@@ -135,7 +135,7 @@ footer{color:var(--muted);font-size:13px}
 <div class="wrap">
   <header>
     <h1>F2P Ironman Quest Route</h1>
-    <p class="lede">All 24 free-to-play quests as one walking route, starting in Lumbridge. Steps from different quests are mixed by location, so you pick things up on the way instead of running back and forth. Tick steps off as you go; everything is saved in this browser.</p>
+    <p class="lede">All 25 free-to-play quests as one walking route, starting in Lumbridge. Steps from different quests are mixed by location, so you pick things up on the way instead of running back and forth. Tick steps off as you go; everything is saved in this browser.</p>
   </header>
 
   <div class="support">
@@ -146,7 +146,7 @@ footer{color:var(--muted);font-size:13px}
 
   <section class="panel" aria-labelledby="you-h">
     <h2 id="you-h">Your account</h2>
-    <div class="panel-row"><span>Quest points: <strong id="qp">0</strong> / 46</span><span>Quests done: <strong id="qdone">0</strong> / 24</span></div>
+    <div class="panel-row"><span>Quest points: <strong id="qp">0</strong> / 47</span><span>Quests done: <strong id="qdone">0</strong> / 25</span></div>
     <div id="stats" aria-label="Your levels"></div>
     <p class="note" style="margin:0">Fill in your levels and the route warns you (orange) at steps you're not ready for. Leave a box empty to skip that check.</p>
     <details>
@@ -188,6 +188,7 @@ footer{color:var(--muted);font-size:13px}
 <script>
 const QUESTS={
 LTR:["Learning the Ropes",1,"Learning_the_Ropes"],
+MUD:["Mudfoot's Big Adventure",1,"Mudfoot%27s_Big_Adventure"],
 COOK:["Cook's Assistant",1,"Cook%27s_Assistant"],
 SHEEP:["Sheep Shearer",1,"Sheep_Shearer"],
 RM:["Rune Mysteries",1,"Rune_Mysteries"],
@@ -250,7 +251,11 @@ const PHASES=[
 ["MM","Misthalin Mystery: talk to <b>Abigale</b> in the south-east corner of Lumbridge Swamp and do the whole quest. Quest done",{det:["Talk to Abigale, offer help and take the rowboat south.","Use the bucket on the rain barrel west of the manor for the key and unlock the doors.","Read the note by the pink-knob door, slash the gloomy painting with the knife for the ruby key, light the four candles and the barrel fuse in the south-east room.","Climb through the damaged wall and look at the tree, play D-E-A-D on the piano and search it for the emerald key.","Open the green-knob door, slash the fireplace and enter the gems: sapphire, diamond, zenyte, emerald, onyx, ruby. You get the sapphire key.","Open the blue-knob door and push the mirror until it faces the wardrobe; a cutscene plays. Take the knife and attack Abigale.","Try to leave the room, then talk to Mandy outside. Quest done."],loc:"Abigale"}],
 ["RG","Talk to <b>Father Urhney</b> in the hut in the west of Lumbridge Swamp for the <b>Ghostspeak amulet</b> and wear it",{loc:"Father_Urhney"}],
 ["RG","Open the coffin in the Lumbridge graveyard and talk to the ghost",{loc:"Restless_ghost"}],
-["","<b>Food stop:</b> cook some fish or meat on the castle range and bank it",{sub:["Aim for 15–20 pieces in the bank for the fights later on"]}]
+["","<b>Food stop:</b> cook some fish or meat on the castle range and bank it",{sub:["Aim for 15–20 pieces in the bank for the fights later on"]}],
+["MUD","Mudfoot's Big Adventure: talk to <b>Captain Harlan</b> just outside the Lumbridge general store, north of the castle (\"Yes.\")",{sub:["Worth doing early: 4 combat XP lamps (500 XP each) and 500 coins"],loc:"Captain_Harlan"}],
+["MUD","Talk to <b>Mudfoot</b> across the River Lum, by the building south of the cow field. Then confront the outlaw outside the general store",{sub:["Don't have a pet following you"]}],
+["MUD","Talk to Mudfoot at the chicken field south of the windmill, kill the <b>ranger outlaw</b>, then confront the <b>mage outlaw</b> south of the H.A.M. hideout",{fight:"Ranger outlaw (6), mage outlaw (6)",det:["Optional first: Captain Harlan gives you a bronze shortsword and wooden shield.","Pick up the ranger's shortbow and arrows, and the mage's staff and runes: you need Magic or Ranged for the last fight."]}],
+["MUD","Lumbridge graveyard (south-east of the castle): kill the <b>warrior outlaw</b> with Magic or Ranged, then tell Captain Harlan \"All of those thieves have been dealt with.\" Quest done",{fight:"Warrior outlaw (8), uses Protect from Melee",det:["Melee doesn't work: he prays against it.","If you leave the area, pick Mudfoot up again outside the H.A.M. hideout before coming back."]}]
 ]},
 {name:"Wizards' Tower",loc:"South of Draynor, then back to Lumbridge",
  inv:{have:"Air talisman, Ghostspeak amulet (worn), some food, about 10 coins",bank:"Cooking and dye ingredients can wait in the bank"},
