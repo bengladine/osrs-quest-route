@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://bengladine.github.io/osrs-quest-route/sitemap.xml

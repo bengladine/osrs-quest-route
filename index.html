@@ -1,0 +1,496 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>F2P Ironman Quest Route</title>
+<meta name="description" content="Every free-to-play OSRS quest in one walking route for ironmen: steps interleaved by location, bank trips, inventory checks, dialogue options and requirement warnings.">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,500..800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+/* base reset */
+*,*::before,*::after{box-sizing:border-box}
+:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+body{margin:0;font-size:14px}
+img{max-width:100%}
+[hidden]{display:none!important}
+.kofi{display:inline-flex;align-items:center;gap:8px;font:600 14px var(--body);color:var(--bg);background:var(--accent);padding:8px 14px;border-radius:999px;text-decoration:none;width:max-content}
+.kofi:hover{filter:brightness(1.08)}
+.support{display:flex;flex-wrap:wrap;align-items:center;gap:10px;color:var(--muted);font-size:14px}
+
+
+/* Layout: single reading column; phases as stacked sections; each step a tickable row with a quest tag. */
+:root{
+  --bg:#EDF0EA; --surface:#F8FAF6; --fg:#1D2620; --muted:#5B6860; --line:#D3DACF;
+  --accent:#8A5E0F; --accent-soft:#F1E3C4; --ok:#2E7D4F; --low:#C2571B; --done:#9AA59D;
+  --display:"Archivo","Arial Narrow",system-ui,sans-serif;
+  --body:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+  --tag-l:36%; --t-IM:#2F6F9F; --t-XM:#8A5E0F; --t-WP:#5E7D2A; --t-IC:#9B3D6B; --t-PA:#B5531E;
+  --t-VS:#7A2E2E; --t-RJ:#C2416A; --t-DEM:#6A4BA0; --t-BIM:#2E7F79; --t-CC:#36648B; --t-DRG:#4E5A52;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#141A16; --surface:#1B231E; --fg:#E3E8E1; --muted:#9AA79E; --line:#2D3830;
+  --accent:#E2B04F; --accent-soft:#3A2F17; --ok:#7FCF9C; --low:#F0915A; --done:#5E6A62;
+  --tag-l:72%; --t-IM:#7BB4E0; --t-XM:#E2B04F; --t-WP:#A9CB6A; --t-IC:#E58BB6; --t-PA:#F0915A;
+  --t-VS:#E08A8A; --t-RJ:#F08AA8; --t-DEM:#B49BE8; --t-BIM:#6CCBC2; --t-CC:#8DB8DF; --t-DRG:#AEBBB2;
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#141A16; --surface:#1B231E; --fg:#E3E8E1; --muted:#9AA79E; --line:#2D3830;
+  --accent:#E2B04F; --accent-soft:#3A2F17; --ok:#7FCF9C; --low:#F0915A; --done:#5E6A62;
+  --tag-l:72%; --t-IM:#7BB4E0; --t-XM:#E2B04F; --t-WP:#A9CB6A; --t-IC:#E58BB6; --t-PA:#F0915A;
+  --t-VS:#E08A8A; --t-RJ:#F08AA8; --t-DEM:#B49BE8; --t-BIM:#6CCBC2; --t-CC:#8DB8DF; --t-DRG:#AEBBB2;
+  color-scheme:dark}
+body{background:var(--bg);color:var(--fg);font:15px/1.55 var(--body);
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:760px;margin:0 auto;padding-block:32px 64px;display:flex;flex-direction:column;gap:28px}
+h1,h2{font-family:var(--display);font-stretch:118%;text-wrap:balance;margin:0;line-height:1.1}
+h1{font-size:clamp(1.9rem,6vw,2.6rem);font-weight:800;letter-spacing:-.01em}
+h2{font-size:1.25rem;font-weight:700}
+.lede{color:var(--muted);margin:8px 0 0;max-width:62ch}
+a{color:var(--accent)}
+.progress{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);padding-block:10px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--line)}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+.bar{flex:1;height:8px;border-radius:4px;background:var(--line);overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:var(--accent);transition:width .3s}
+.count{font:500 13px var(--mono);font-variant-numeric:tabular-nums;color:var(--muted);white-space:nowrap}
+button{font:600 13px var(--body);color:var(--fg);background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:6px 10px;cursor:pointer}
+button:hover{border-color:var(--accent)}
+button:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.legend{display:flex;flex-wrap:wrap;gap:6px}
+.tag{font:500 11px/1 var(--mono);letter-spacing:.04em;padding:4px 6px;border-radius:4px;border:1px solid currentColor;text-decoration:none;white-space:nowrap}
+.legend .tag:hover{background:var(--accent-soft)}
+.note{background:var(--accent-soft);border-radius:8px;padding:12px 14px;font-size:14px}
+section{display:flex;flex-direction:column;gap:10px}
+.phase-head{display:flex;align-items:baseline;gap:10px;border-bottom:2px solid var(--fg);padding-bottom:6px}
+.phase-head .n{font:500 13px var(--mono);color:var(--accent)}
+.phase-head .loc{margin-left:auto;font-size:13px;color:var(--muted)}
+ul.steps{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+ul.steps>li{display:grid;grid-template-columns:22px auto 1fr;gap:10px;align-items:start;padding:8px 0;border-bottom:1px solid var(--line)}
+ul.steps>li>*{min-width:0}
+.steps input{width:18px;height:18px;margin:2px 0 0;accent-color:var(--accent);cursor:pointer}
+.steps .tag{justify-self:start;margin-top:2px}
+.steps label{cursor:pointer}
+ul.steps>li.done label{color:var(--done);text-decoration:line-through}
+ul.steps>li.warn>label::before{content:"⚠ ";color:var(--accent)}
+.steps ul{margin:4px 0 0;padding-left:18px;color:var(--muted);font-size:14px}
+.tag.none{border-color:transparent;color:var(--muted)}
+.later{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
+.later div{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:14px}
+.later h3{margin:0 0 6px;font:700 15px var(--display);font-stretch:112%}
+.later p,.later ul{margin:0;font-size:14px;color:var(--muted)}
+.later ul{padding-left:18px}
+.inv{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:8px 12px;font-size:14px}
+.inv summary{cursor:pointer;font-weight:600;color:var(--accent)}
+.inv p{margin:6px 0 0;max-width:70ch}
+
+.tags{display:flex;flex-direction:column;gap:3px;align-items:flex-start;margin-top:2px}
+.badges{grid-column:3;display:flex;flex-wrap:wrap;gap:6px}
+.badge{font:500 12px/1.2 var(--body);padding:3px 7px;border-radius:999px;border:1px solid var(--line);color:var(--muted)}
+.badge.fight{border-color:var(--accent);color:var(--accent)}
+.badge.req.ok{color:var(--ok);border-color:var(--ok)}
+.badge.req.low{color:var(--bg);background:var(--low);border-color:var(--low);font-weight:600}
+ul.steps>li.skip{opacity:.4}
+ul.steps>li.skip label{text-decoration:line-through}
+ul.steps>li.skip .more,ul.steps>li.skip .badges,ul.steps>li.skip .wlink,ul.steps>li.skip label ul{display:none}
+.later div.skip{opacity:.4;text-decoration:line-through}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px;display:flex;flex-direction:column;gap:12px}
+.panel h2{font-size:1.05rem}
+.panel-row{display:flex;flex-wrap:wrap;gap:16px;align-items:baseline}
+.panel-row strong{font:700 1.3rem var(--display);font-stretch:112%;font-variant-numeric:tabular-nums}
+#qlist{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:4px 12px}
+.qitem{display:flex;align-items:center;gap:8px;font-size:14px;cursor:pointer;padding:3px 0}
+.qitem input{width:16px;height:16px;accent-color:var(--accent)}
+.qitem small{margin-left:auto;color:var(--muted);font:500 11px var(--mono)}
+#stats{display:flex;flex-wrap:wrap;gap:10px}
+.stat{display:flex;flex-direction:column;gap:3px;font-size:12px;color:var(--muted)}
+.stat input{width:76px;font:500 15px var(--mono);padding:6px 8px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--fg)}
+.panel details summary{cursor:pointer;font-weight:600;color:var(--accent)}
+
+.wlink{grid-column:3;font-size:13px;justify-self:start}
+.more{grid-column:3}
+.more summary{cursor:pointer;font-size:13px;font-weight:600;color:var(--accent);width:max-content}
+.more ol{margin:6px 0 2px;padding-left:20px;font-size:14px;display:flex;flex-direction:column;gap:3px}
+ul.steps>li.done .more{opacity:.6}
+.pics{grid-column:3;display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end}
+.pics img{max-width:100%;height:auto;border-radius:4px}
+.pics img.head{height:64px;width:auto}
+.pics figure{margin:0;max-width:300px;display:flex;flex-direction:column;gap:4px}
+.pics figure.map img{border:1px solid var(--line)}
+.pics figcaption{font-size:12px;color:var(--muted)}
+ul.steps>li.done .pics{opacity:.45}
+footer{color:var(--muted);font-size:13px}
+@media (max-width:480px){.badges{grid-column:2}.tags{flex-direction:row;flex-wrap:wrap}ul.steps>li{grid-template-columns:22px 1fr}.steps .tag{grid-column:2}.steps label{grid-column:2}.pics{grid-column:2}.more{grid-column:2}.wlink{grid-column:2}}
+@media (prefers-reduced-motion:reduce){.bar i{transition:none}}
+
+</style>
+</head>
+<body>
+
+
+<div class="wrap">
+  <header>
+    <h1>F2P Ironman Quest Route</h1>
+    <p class="lede">All 24 free-to-play quests as one walking route, starting in Lumbridge. Steps from different quests are mixed by location, so you pick things up on the way instead of running back and forth. Tick steps off as you go; everything is saved in this browser.</p>
+  </header>
+
+
+
+  <section class="panel" aria-labelledby="you-h">
+    <h2 id="you-h">Your account</h2>
+    <div class="panel-row"><span>Quest points: <strong id="qp">0</strong> / 46</span><span>Quests done: <strong id="qdone">0</strong> / 24</span></div>
+    <div id="stats" aria-label="Your levels"></div>
+    <p class="note" style="margin:0">Fill in your levels and the route warns you (orange) at steps you're not ready for. Leave a box empty to skip that check.</p>
+    <details>
+      <summary>Quests you've already done</summary>
+      <p style="margin:8px 0;color:var(--muted);font-size:14px">Tick a quest and all its steps are crossed out. Steps that serve several quests stay until all of them are done.</p>
+      <div id="qlist"></div>
+    </details>
+  </section>
+
+  <div class="progress">
+    <div class="bar" aria-hidden="true"><i id="fill"></i></div>
+    <span class="count" id="count">0 / 0</span>
+    <button id="reset" type="button">Reset ticks</button>
+  </div>
+  <p id="confirm" class="note" hidden>Untick every step? Your quest list and levels stay. <button id="yes" type="button">Yes, reset</button> <button id="no" type="button">Cancel</button></p>
+
+  <p class="note"><strong>Coins:</strong> you'll need a few hundred coins over the route (boats, tolls, dyes, an iron chainbody). Pirate's Treasure pays 450 back.</p>
+  <p class="note"><strong>Imps:</strong> kill every imp you see along the way. You need 1 red, 1 yellow, 1 black and 1 white bead for Imp Catcher. Best spot if you're short: Falador's south entrance.</p>
+  <p class="note"><strong>Armour and run energy:</strong> weight doesn't slow you down, but it drains run energy faster. Travel light through towns and put armour on for the fights.</p>
+  <p class="note"><strong>Dialogue:</strong> where you must pick a specific chat option, it's in the step or under "Detailed steps". If an NPC doesn't mention your quest, look for "Talk about something else".</p>
+
+  <div id="phases"></div>
+
+  <section>
+    <div class="phase-head"><h2>After the route</h2></div>
+    <div class="later" id="later"></div>
+  </section>
+
+  
+
+  <footer>Route and step notes written by the author. Quest facts checked against the <a href="https://oldschool.runescape.wiki" target="_blank" rel="noopener">OSRS Wiki</a>, where you'll find maps and screenshots for every step. Found a mistake? <a href="https://github.com/bengladine/osrs-quest-route/issues/new?template=route-mistake.md" target="_blank" rel="noopener">Report it on GitHub</a> so it can be fixed. Created using intellectual property belonging to Jagex Limited under the terms of Jagex's Fan Content Policy. This content is not endorsed by or affiliated with Jagex.</footer>
+</div>
+
+<script>
+const QUESTS={
+LTR:["Learning the Ropes",1,"Learning_the_Ropes"],
+COOK:["Cook's Assistant",1,"Cook%27s_Assistant"],
+SHEEP:["Sheep Shearer",1,"Sheep_Shearer"],
+RM:["Rune Mysteries",1,"Rune_Mysteries"],
+RG:["The Restless Ghost",1,"The_Restless_Ghost"],
+IM:["The Ides of Milk",1,"The_Ides_of_Milk"],
+MM:["Misthalin Mystery",1,"Misthalin_Mystery"],
+XM:["X Marks the Spot",1,"X_Marks_the_Spot"],
+ERN:["Ernest the Chicken",4,"Ernest_the_Chicken"],
+WP:["Witch's Potion",1,"Witch%27s_Potion"],
+PT:["Pirate's Treasure",2,"Pirate%27s_Treasure"],
+PA:["Prince Ali Rescue",3,"Prince_Ali_Rescue"],
+VS:["Vampyre Slayer",3,"Vampyre_Slayer"],
+RJ:["Romeo & Juliet",5,"Romeo_%26_Juliet"],
+DEM:["Demon Slayer",3,"Demon_Slayer"],
+DOR:["Doric's Quest",1,"Doric%27s_Quest"],
+BKF:["Black Knights' Fortress",3,"Black_Knights%27_Fortress"],
+BIM:["Below Ice Mountain",1,"Below_Ice_Mountain"],
+IC:["Imp Catcher",1,"Imp_Catcher"],
+GD:["Goblin Diplomacy",5,"Goblin_Diplomacy"],
+KS:["The Knight's Sword",1,"The_Knight%27s_Sword"],
+CC:["The Corsair Curse",2,"The_Corsair_Curse"],
+SOA:["Shield of Arrav",1,"Shield_of_Arrav"],
+DRG:["Dragon Slayer I",2,"Dragon_Slayer_I"]};
+
+/* Step: [quests, text, opts]
+   quests: "KEY" or ["KEY",...] — the step is skipped when ALL listed quests are marked done. "" = always shown.
+   opts: sub (short notes), det (detailed steps), req {combat, qp, mining, smithing, cooking, crafting, magic},
+         fight "Name (level)", loc wiki page, warn true */
+const PHASES=[
+{name:"Lumbridge",loc:"Castle, farms, cow field and swamp",
+ inv:{have:"Your starter items: bronze axe, pickaxe, tinderbox, bucket, pot, weapon and some food",bank:""},
+ steps:[
+["","Read this first: the route assumes you've just finished Learning the Ropes. Mark any quest you've already done in the quest list at the top and its steps cross out automatically.",{}],
+["",["Buy a <b>spade</b>, an extra <b>bucket</b>, <b>3 extra pots</b> and a <b>knife</b> at the Lumbridge general store"],{sub:["You need 2 buckets and 4 pots in total for the cooking steps below"],loc:"Lumbridge_General_Store"}],
+["COOK","Talk to the <b>Cook</b> in the castle kitchen (ground floor). He needs an egg, a bucket of milk and a pot of flour",{loc:"Cook_(Lumbridge)"}],
+["RM","Talk to <b>Duke Horacio</b> upstairs in the castle and ask for a quest. You get an <b>air talisman</b>",{det:["Duke Horacio is on the first floor of Lumbridge Castle.","Choose \"Have you any quests for me?\" and accept.","Keep the air talisman; it goes to the Wizards' Tower."],loc:"Duke_Horacio"}],
+["RG","Talk to <b>Father Aereck</b> in the church east of the castle and agree to help with the ghost",{loc:"Father_Aereck"}],
+["XM","Talk to <b>Veos</b> in the Sheared Ram pub to start",{loc:"Veos"}],
+["XM","Dig 1: under the north-west window of the small room attached to <b>Bob's Axes</b>",{loc:"Bob%27s_Brilliant_Axes"}],
+["XM","Dig 2: <b>behind the castle</b>, outside the kitchen door, south-west of the big crate",{loc:"Lumbridge_Castle"}],
+["IM","Talk to <b>Cassius</b> at the pond south of the windmill",{loc:"Cassius"}],
+["IM","Talk to <b>Gillie Groats</b> in the cow field, then <b>Seth Groats</b> in the farmhouse by the chicken coop; search the shelves for the book",{det:["Gillie Groats is the milkmaid in the cow field.","Seth Groats is in the farmhouse next to the chicken coop.","Search the shelves there for the book 'The Groats' principles'."],loc:"Gillie_Groats"}],
+["IM","Give Cassius the book, drink the milk sample in front of him, then get a second sample",{loc:"Cassius"}],
+["IM","Talk to <b>Duke Horacio</b> upstairs in the castle about the permit",{loc:"Duke_Horacio"}],
+["IM","Back to Gillie, drink the sample, open the gate north-east and fight <b>Brutus</b>",{fight:"Brutus (can't kill you during the quest)",det:["Snort: step 2 tiles sideways or 1 tile back.","Growl: step 2 tiles sideways.","His normal attacks can't kill you during the quest, but the special attacks hit up to 19."],loc:"Brutus"}],
+["IM","Talk to Gillie, then Cassius. Quest done. The lamp goes on any combat skill",{}],
+["COOK","Fill a bucket with milk from a <b>dairy cow</b> in the cow field",{loc:"Dairy_cow"}],
+[["DEM","WP"],"Kill cows for <b>25 bones</b> and <b>1 raw beef</b>",{sub:["Bones don't stack: bank them at the castle bank (top floor) whenever your bag fills","The bones are for Demon Slayer, the beef for Witch's Potion"]}],
+["COOK","Pick up an <b>egg</b> at the chicken farm north-west of the cow field",{}],
+["SHEEP","Talk to <b>Fred the Farmer</b> in the house by the sheep pen north-west of the castle",{loc:"Fred_the_Farmer"}],
+[["SHEEP","PA"],"Shear sheep for <b>23 wool</b>: 20 for Sheep Shearer and 3 for Prince Ali's wig",{sub:["Rams and The Thing can't be sheared"]}],
+[["WP","PA","GD"],"Pick <b>5 onions</b> at Fred's farm",{sub:["2 for Prince Ali's yellow dye, 2 for the Goblin Diplomacy dye, 1 for Witch's Potion"]}],
+[["COOK","BIM","PA","KS"],"Pick <b>4 wheat</b> and make <b>4 pots of flour</b> at the windmill",{sub:["1 for the Cook, 1 for bread, 1 for skin paste, 1 for Knight's Sword pastry"],det:["Put grain in the hopper on the top floor and pull the lever.","Collect the flour from the bin on the ground floor with an empty pot.","Repeat for each pot."],loc:"Mill_Lane_Mill"}],
+["SHEEP","Spin <b>23 balls of wool</b> on the spinning wheel upstairs in the castle",{}],
+["COOK","Give the Cook the egg, milk and flour. Quest done",{}],
+["SHEEP","Give Fred the <b>20 balls of wool</b>. Quest done. Keep the other 3",{}],
+["BIM","Use 1 pot of flour + water to make dough and bake <b>1 bread</b> on the castle range",{}],
+["WP","Cook the beef <b>twice</b> on the range to get <b>burnt meat</b>",{}],
+["PA","Chop a log and burn it for <b>ashes</b>",{}],
+["MM","Misthalin Mystery: talk to <b>Abigale</b> in the south-east corner of Lumbridge Swamp and do the whole quest. Quest done",{det:["Talk to Abigale, offer help and take the rowboat south.","Use the bucket on the rain barrel west of the manor for the key and unlock the doors.","Read the note by the pink-knob door, slash the gloomy painting with the knife for the ruby key, light the four candles and the barrel fuse in the south-east room.","Climb through the damaged wall and look at the tree, play D-E-A-D on the piano and search it for the emerald key.","Open the green-knob door, slash the fireplace and enter the gems: sapphire, diamond, zenyte, emerald, onyx, ruby. You get the sapphire key.","Open the blue-knob door and push the mirror until it faces the wardrobe; a cutscene plays. Take the knife and attack Abigale.","Try to leave the room, then talk to Mandy outside. Quest done."],loc:"Abigale"}],
+["RG","Talk to <b>Father Urhney</b> in the hut in the west of Lumbridge Swamp for the <b>Ghostspeak amulet</b> and wear it",{loc:"Father_Urhney"}],
+["RG","Open the coffin in the Lumbridge graveyard and talk to the ghost",{loc:"Restless_ghost"}],
+["","<b>Food stop:</b> cook some fish or meat on the castle range and bank it",{sub:["Aim for 15–20 pieces in the bank for the fights later on"]}]
+]},
+{name:"Wizards' Tower",loc:"South of Draynor, then back to Lumbridge",
+ inv:{have:"Air talisman, Ghostspeak amulet (worn), some food, about 10 coins",bank:"Cooking and dye ingredients can wait in the bank"},
+ steps:[
+["RM","Go down to the Tower's basement and give the air talisman to <b>Archmage Sedridor</b>. You get a <b>research package</b>",{loc:"Archmage_Sedridor"}],
+["RG","Search the altar in the basement for the ghost's <b>skull</b>",{fight:"Skeleton (13), or run",req:{combat:10},loc:"Wizards%27_Tower"}],
+["IC","Talk to <b>Wizard Mizgog</b> on the top floor: \"Give me a quest please.\" then \"Yes.\"",{sub:["From now on, kill every imp you see: you need 1 red, 1 yellow, 1 black and 1 white bead"],loc:"Wizard_Mizgog"}],
+["RG","Back in the Lumbridge graveyard, use the skull on the coffin. Quest done",{loc:"Restless_ghost"}]
+]},
+{name:"Al Kharid",loc:"10 coin toll each way",
+ inv:{have:"About 30 coins",bank:""},
+ steps:[
+["PA","Talk to <b>Hassan</b> in the palace, then <b>Osman</b> outside",{loc:"Chancellor_Hassan"}],
+["DRG","Buy <b>1 silk</b> from the silk trader",{loc:"Silk_trader"}],
+["","Go back through the toll gate",{}]
+]},
+{name:"Draynor Village",loc:"Village, jail and Draynor Manor",
+ inv:{have:"3 balls of wool, 4 onions, about 40 coins, spade, some food",bank:""},
+ steps:[
+["VS","Talk to <b>Morgan</b> in the north house (\"Yes\"), then take the <b>garlic</b> from the cupboard upstairs",{loc:"Morgan"}],
+["PA","<b>Ned</b>: give 3 balls of wool for a <b>wig</b>, then buy a <b>rope</b> for 15 coins",{det:["Ask Ned if he can make other things from wool, then ask for a wig.","Talk again and ask for a rope."],loc:"Ned"}],
+[["PA","GD"],"<b>Aggie</b>: 4 onions + 10 coins for <b>2 yellow dyes</b>. Use 1 on the wig",{sub:["The second yellow dye is for Goblin Diplomacy later"],loc:"Aggie"}],
+["PA","Talk to <b>Leela</b>, near the jail",{loc:"Leela"}],
+["XM","Dig 3: 4 tiles north of the bush near Leela",{det:["Veos's orb works like hot/cold: it gets warmer as you walk closer."]}],
+["XM","Dig 4: in the <b>pig pen</b> next to Martin the Master Gardener",{loc:"Martin_the_Master_Gardener"}],
+["ERN","Ernest the Chicken: talk to <b>Veronica</b> by the gate of Draynor Manor, then <b>Professor Oddenstein</b> upstairs",{loc:"Veronica"}],
+["ERN","Collect the <b>pressure gauge</b>, <b>rubber tube</b> and <b>oil can</b> in the manor",{fight:"Skeleton (22) guards the rubber tube",req:{combat:15},det:["Poison: green bottle in the small room south of the kitchen (ground floor).","Fish food: blue box upstairs, in the room south of the main staircase.","Use the fish food on the poison, then on the fountain in the south-west of the grounds. Search the fountain for the pressure gauge.","Spade: by the door in the south-east room (or bring yours). Search the compost heap on the west side of the grounds for a key.","Rubber tube: in the room behind the stairs (use the key). An aggressive skeleton (level 22) is inside.","Oil can: search the bookcase on the west wall of the west room, take the ladder down, then do the lever puzzle:","Pull B, then A down. Go through door 1.","Pull D down. Go through doors 2, then 3.","Pull B, then A up. Go through doors 3, 4 and 5.","Pull E, then F down. Go through doors 6 and 7.","Pull C down. Go through doors 7 and 6.","Pull E up. Go through doors 6, 8 and 3.","Go through door 9 and take the oil can."],loc:"Draynor_Manor"}],
+["ERN","Give Oddenstein the three items. Quest done",{loc:"Professor_Oddenstein"}]
+]},
+{name:"Port Sarim, Rimmington and Karamja",loc:"",
+ inv:{have:"Spade, 1 onion, burnt meat, pickaxe, 2 buckets of water, about 100 coins",bank:""},
+ steps:[
+["XM","Give the casket to <b>Veos</b> on the docks south of the Rusty Anchor. Quest done",{loc:"Veos"}],
+["PT","Talk to <b>Redbeard Frank</b> outside the Rusty Anchor. He wants Karamjan rum",{loc:"Redbeard_Frank"}],
+["PT","Sail to Karamja with the sailors on the docks (30 coins)",{}],
+["PT","Buy <b>1 Karamjan rum</b> from Zembo in the bar west of the dock",{sub:["Don't teleport or leave the island with it in your inventory"],warn:true,loc:"Zembo"}],
+["PT","Pick <b>10 bananas</b>, ask <b>Luthas</b> for a job, put the rum in his crate and fill it with the bananas",{det:["Bananas: the plantation north of Luthas's hut.","Ask Luthas for a job first.","Use the rum on the crate outside the south-east corner of his hut, then use the bananas on it one by one.","Talk to Luthas again: he pays you 30 coins and says the crate goes to Wydin in Port Sarim."],loc:"Luthas"}],
+["PT","Sail back with the customs officer (30 coins)",{}],
+["PT","Take the <b>white apron</b> in Gerrant's fishing shop and wear it. Ask <b>Wydin</b> for a job, then search the crate in his back room for the rum",{loc:"Wydin"}],
+["PT","Give the rum to Redbeard Frank for a <b>chest key</b>",{}],
+[["WP"],"Buy an <b>eye of newt</b> from Betty (3 coins)",{loc:"Betty"}],
+[["PA","GD","KS"],"Buy <b>5 redberries</b> from Wydin (3 coins each)",{sub:["1 for skin paste, 3 for Goblin Diplomacy's red dye, 1 for the redberry pie"],loc:"Wydin"}],
+["DRG","Buy a <b>lobster pot</b> from Gerrant",{loc:"Gerrant"}],
+["WP","Talk to <b>Hetty</b> in Rimmington and ask for a quest",{loc:"Hetty"}],
+["WP","Kill a level 1 <b>rat</b> in the archery shop west of Hetty's house for its tail",{sub:["Start the quest first; giant rats don't count"]}],
+["WP","Give Hetty the onion, eye of newt, burnt meat and rat's tail, then drink from the cauldron. Quest done",{}],
+[["PA","BKF","DRG","KS"],"Rimmington mine: <b>4 clay, 2 copper, 2 tin</b>",{loc:"Rimmington_mine"}],
+[["PA","DRG","KS"],"Use clay on water to make <b>3 soft clay</b>. Keep 1 plain clay spare",{sub:["Refill your buckets at a water source (water icon on the minimap)"]}]
+]},
+{name:"Back through Draynor",loc:"",
+ inv:{have:"Redberries, ashes, 1 pot of flour, bucket of water, soft clay, yellow dye, 10 coins",bank:""},
+ steps:[
+["PA","<b>Aggie</b>: redberries + ashes + flour + water for <b>skin paste</b>",{loc:"Aggie"}],
+["GD","<b>Aggie</b>: 3 redberries + 5 coins for <b>red dye</b>. Use it on your yellow dye for <b>orange dye</b>",{loc:"Aggie"}],
+["PA","Get the <b>key print</b> from <b>Lady Keli</b> at the jail (soft clay in your inventory)",{det:["\"Heard of you? You're famous in Gielinor!\"","\"What is your latest plan then?\"","\"How do you know someone won't try to free him?\"","\"Could I see the key please?\"","\"Could I touch the key for a moment please?\"","No key print? Talk to her again with the same options."],loc:"Lady_Keli"}]
+]},
+{name:"Falador, Taverley and the Dwarven Mine",loc:"",
+ inv:{have:"Copper and tin ore, key print, hammer, pickaxe, about 300 coins, bread, knife, soft clay, Prince Ali items",bank:""},
+ steps:[
+[["PA","BKF"],"Falador furnace: smelt <b>2 bronze bars</b>, then use the furnace with the key print and 1 bar for the <b>bronze key</b>",{loc:"Falador_furnace"}],
+["DOR","Talk to <b>Doric</b> in his house north of Falador (by Taverley's east gate)",{loc:"Doric"}],
+["BKF","Smith a <b>bronze med helm</b> on Doric's anvil with your spare bronze bar",{req:{smithing:3}}],
+[["DOR","KS"],"Dwarven Mine (south of Ice Mountain): mine <b>6 clay, 4 copper</b> and at least <b>6 iron</b>",{req:{mining:15},sub:["2 iron for Doric, the rest for Knight's Sword iron bars","Watch for scorpions in the south of the mine"],loc:"Dwarven_Mine"}],
+["DOR","Give Doric the 6 clay, 4 copper and 2 iron. Quest done",{}],
+["KS","Smelt <b>2 iron bars</b> at the Falador furnace",{req:{smithing:15},sub:["Iron smelting fails half the time at low levels; that's why you mined extra ore"]}],
+["GD","Buy <b>2 woad leaves</b> from Wyson in Falador Park: offer \"About 20 coins\"",{loc:"Wyson_the_gardener"}],
+["KS","Talk to the <b>Squire</b> in the White Knights' Castle courtyard",{loc:"Squire_(The_Knight%27s_Sword)"}],
+["BKF","Buy an <b>iron chainbody</b> at Wayne's Chains",{loc:"Wayne%27s_Chains"}],
+["BKF","Talk to <b>Sir Amik Varze</b> upstairs in the White Knights' Castle and read the dossier",{req:{qp:12},loc:"Sir_Amik_Varze"}],
+["BKF","Get a <b>cabbage</b> (any, except from Draynor Manor)",{sub:["The Edgeville Monastery garden has cabbages"]}],
+["BKF","Black Knights' Fortress: wear the chainbody and med helm, enter, overhear the plot at the grill, then drop the cabbage down the hole",{fight:"Black Knights attack you inside",req:{combat:20},det:["The fortress is north-east of Falador, west of the Monastery. The knights outside attack players under combat 67; run past them.","Wear the iron chainbody and bronze med helm and enter by the south door. You can take them off once inside.","Push the wall in front of you, climb up the ladder, up the ladder to its right, down the ladder to the south, through the east door, up the closest ladder, down the ladder to the east, open the sturdy door to the south and climb down the ladder west of it.","Listen at the grill.","Go back to the entrance, enter the room directly east (tell the guard you don't care), climb the ladder on the north wall, walk around the landing and push the wall.","Right-click the cabbage and use it on the hole."],loc:"Black_Knights%27_Fortress"}],
+["BKF","Tell Sir Amik Varze you sabotaged the potion. Quest done",{}],
+["DRG","Rising Sun Inn: buy a <b>wizard's mind bomb</b>",{loc:"Rising_Sun_Inn"}],
+["BIM","Talk to <b>Willow</b> on the path south of Ice Mountain (\"Yes\")",{req:{qp:16},loc:"Willow_(Below_Ice_Mountain)"}],
+["BIM","Buy a beer at the Rising Sun Inn, give it to <b>Burntof</b> and win rock-paper-scissors",{loc:"Burntof"}]
+]},
+{name:"Barbarian Village, Edgeville and Varrock",loc:"",
+ inv:{have:"Travel light. Bread, knife, soft clay ×2, about 30 coins, empty bucket, pickaxe, chest key, research package, Prince Ali items, garlic",bank:"Spade, axe, shears, and the Dragon Slayer items"},
+ steps:[
+["BIM","Talk to <b>Checkal</b> near the pottery oven, train with <b>Atlas</b> in the Long Hall (\"Yes\"), then use the <b>Flex</b> emote by Checkal",{loc:"Checkal"}],
+["BIM","Take the <b>cooked meat and beer</b> from the tables",{}],
+["DRG","Make an <b>unfired bowl</b> on the potter's wheel (don't fire it)",{req:{crafting:8}}],
+["KS","Make a <b>pie dish</b> on the potter's wheel and fire it in the oven",{req:{crafting:7}}],
+["BIM","Talk to <b>Marley</b> at the Edgeville yews",{loc:"Marley"}],
+["BIM","Blue Moon Inn: ask the cook \"I was wondering if you'd be able to make me a Steak sandwich?\", then knife + meat with bread for the <b>steak sandwich</b>",{loc:"Blue_Moon_Inn"}],
+["PT","Go upstairs in the Blue Moon Inn and open <b>Hector's chest</b> with the key. Read the pirate message",{}],
+[["PA","VS"],"Buy <b>4 beers</b> at the Blue Moon Inn",{}],
+["VS","<b>Dr Harlow</b>: \"I need your help dealing with a vampyre.\", give him a beer for the <b>stake</b>",{loc:"Dr_Harlow"}],
+["RJ","<b>Romeo</b> in the square → <b>Juliet</b> on the balcony west of the west bank → back to Romeo with her message",{loc:"Romeo"}],
+["RJ","<b>Father Lawrence</b> in the church east of the palace",{loc:"Father_Lawrence"}],
+[["RJ","KS"],"Pick <b>cadava berries</b> (and a redberry if you're short) from the bushes west of the south-east mine",{sub:["Cadava berries and redberries grow side by side; check the name"]}],
+["RJ","<b>Apothecary</b>: \"Talk about something else\", then ask about the Romeo and Juliet potion",{loc:"Apothecary"}],
+["RJ","Give the potion to Juliet, then tell Romeo to meet her in the crypt. Quest done",{}],
+["DEM","<b>Gypsy Aris</b> (1 coin): ask \"So, how did Wally kill Delrith?\" and <b>write down the 5 words</b>",{warn:true,loc:"Gypsy_Aris"}],
+["DEM","Sir Prysin in the palace: say Aris sent you, ask for Silverlight",{loc:"Sir_Prysin"}],
+["DEM","Key 1: <b>Captain Rovin</b> on the top floor of the palace",{loc:"Captain_Rovin"}],
+["DEM","Key 2: fill your bucket at the palace kitchen sink, pour it down the drain outside the kitchen, then get the key in the sewers",{det:["The drain is against the wall just north of the kitchen door.","The manhole is just south of the palace's east wall (dungeon icon on the minimap).","In the sewer, head north-west to a stream. The rusty key is in a muddy patch next to a pile of skeletons."],loc:"Varrock_Sewers"}],
+["RM","Give the research package to <b>Aubury</b> in his rune shop. You get <b>research notes</b>",{loc:"Aubury"}],
+["KS","Ask <b>Reldo</b> in the palace library about the Imcando dwarves",{loc:"Reldo"}],
+["PA","Buy a <b>pink skirt</b> from Thessalia (2 coins)",{loc:"Thessalia"}],
+["BIM","Give the sandwich to <b>Marley</b> in Edgeville",{}],
+["BIM","Talk to <b>Willow</b> at the Camdozaal entrance on the west side of Ice Mountain (\"Yes\")",{}],
+["BIM","Ancient Guardian: mine the 4 corner pillars, or kill it. Quest done",{fight:"Ancient Guardian (25), or mine the pillars",req:{mining:10}}]
+]},
+{name:"Southern loop",loc:"Three bank trips",
+ inv:{have:"Armour on. Trip 1: Prince Ali items, 3 beers, garlic, stake, hammer, ~12 food. Trip 2: 25 bones, imp beads, research notes. Trip 3: keys, ~10 food",bank:"Everything not needed for the current trip"},
+ steps:[
+[["PA","VS","GD","KS"],"<b>Trip 1</b>, Lumbridge bank: take the trip 1 items, plus 2 woad leaves, 5 coins and the pie ingredients",{sub:["All banks share the same storage"]}],
+["KS","Make the <b>redberry pie</b> on the castle range: flour + water → pastry dough, dough in the pie dish, add redberries, bake",{req:{cooking:10}}],
+["GD","<b>Aggie</b>: 2 woad leaves + 5 coins for <b>blue dye</b>",{loc:"Aggie"}],
+["PA","Talk to <b>Leela</b> with all the disguise items, then give <b>Joe</b> 3 beers (\"I have some beer here, fancy one?\")",{loc:"Leela"}],
+["PA","Use the rope on Lady Keli, open the cell with the bronze key, talk to <b>Ali</b>",{}],
+["VS","Draynor Manor basement: kill <b>Count Draynor</b>. Garlic in inventory, stake and hammer with you. Quest done",{fight:"Count Draynor (34)",req:{combat:25},loc:"Count_Draynor"}],
+["IC","<b>Trip 2</b>: collect beads (best spot: Falador's south entrance), take the 25 bones, then Wizards' Tower: give Mizgog all 4 beads. Quest done",{sub:["1 red, 1 yellow, 1 black, 1 white; about 5 in 128 kills per colour"],loc:"Imp"}],
+["DEM","Give the 25 bones to <b>Wizard Traiborn</b> for key 3",{det:["Ask him about the key; he's forgotten.","Ask if he has any keys knocking around.","Hand over the bones (in parts is fine)."],loc:"Wizard_Traiborn"}],
+["RM","Give the research notes to <b>Archmage Sedridor</b> in the basement. Quest done",{}],
+["CC","Optional now: The Corsair Curse, from Captain Tock at the crossroads north of Port Sarim. Tick when the quest is done",{fight:"Ithoi the Navigator (35), magic",req:{combat:25},det:["Agree to help Captain Tock and sail from the dock west of Rimmington.","Talk to Ithoi, then Arsen, Colin and Gnocci (upstairs in their huts).","Arsen: get the ogre artefact from Tock, show it to Chief Tess at the dungeon entrance, report back.","Colin: look through Ithoi's telescope, report back.","Gnocci: dig at the sand lump west of Ithoi's hut, report back.","Talk to Tock, then Gnocci, then Arsen.","Accuse Ithoi of cooking the meal and say the Captain plans to fire him. Light the driftwood under his hut with a tinderbox.","Tell Tock, kill Ithoi, talk to Tock again."],loc:"Captain_Tock"}],
+["DEM","<b>Trip 3</b>: give all 3 keys to Sir Prysin for <b>Silverlight</b>",{}],
+["DEM","Kill <b>Delrith</b> at the stone circle south of Varrock and say the incantation. Quest done",{fight:"Delrith (27); dark wizards nearby attack low levels",req:{combat:20},loc:"Delrith"}],
+["PA","Talk to <b>Hassan</b> in Al Kharid. Quest done",{}]
+]},
+{name:"Falador loop",loc:"Knight's Sword, Pirate's Treasure, Goblin Diplomacy",
+ inv:{have:"Redberry pie, 2 iron bars, pickaxe, spade, pirate message, orange dye, blue dye, some food",bank:""},
+ steps:[
+["KS","Give <b>Thurgo</b> the redberry pie (south of Port Sarim)",{loc:"Thurgo"}],
+["KS","Talk to the Squire, then take the <b>portrait</b> from Sir Vyvin's cupboard upstairs while he's not looking",{loc:"Sir_Vyvin"}],
+["PT","Falador Park: dig in the middle of the dirt X by the Saradomin statue. Kill or escape the gardener, then dig again. Quest done",{fight:"Gardener (4)"}],
+["GD","Goblin Village (north of Falador): take 3 goblin mail from the crates",{det:["Behind the generals' hut.","In the western hut between the small square hut and the generals' hut.","Up the ladder near the gate."],loc:"Goblin_Village"}],
+["GD","Dye 1 mail orange and 1 blue, leave 1 plain. Give the generals orange, then blue, then plain. Quest done",{loc:"General_Bentnoze"}],
+["KS","Give Thurgo the portrait, then mine <b>blurite ore</b> in the Asgarnian Ice Dungeon east of him",{fight:"Ice warriors (57) and ice giants (53): run",req:{mining:10},warn:true,loc:"Asgarnian_Ice_Dungeon"}],
+["KS","Give Thurgo the blurite and 2 iron bars for the sword, then bring it to the Squire. Quest done",{}]
+]}
+];
+
+const LATER=[
+{q:"SOA",title:"Shield of Arrav",text:"Needs a second player from the other gang. Start with Reldo in the Varrock palace library. Ironmen use the certificate halves on each other instead of trading. Find a partner in the SOA chat channel."},
+{q:"DRG",title:"Dragon Slayer I",text:"Needs 32 quest points. Bring the silk, lobster pot, mind bomb and unfired bowl from this route. Also needed: 3 planks, 90 steel nails (34 Smithing), a hammer, 2,000 coins for the ship, and 33 Magic or 10,000 coins for Wormbrain's map piece. Elvarg is level 83: aim for combat 45+ and the anti-dragon shield from Duke Horacio.",req:{qp:32,combat:45,smithing:34}}
+];
+
+const W="https://oldschool.runescape.wiki/w/";
+const KEY="f2p-route-full-v1";
+let S={ticks:{},done:{LTR:true},stats:{}};
+try{const raw=localStorage.getItem(KEY);if(raw)S=Object.assign(S,JSON.parse(raw))}catch(e){}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+const qlist=q=>q===""?[]:(Array.isArray(q)?q:[q]);
+const SKILLS=[["combat","Combat"],["mining","Mining"],["smithing","Smithing"],["cooking","Cooking"],["crafting","Crafting"],["magic","Magic"]];
+const isDoneStep=(text)=>/Quest done|quest is done/.test(text);
+
+/* quest points: quests marked done, plus quests whose "Quest done" step is ticked */
+function questComplete(k){
+  if(S.done[k])return true;
+  let found=false;
+  PHASES.forEach((p,pi)=>p.steps.forEach((s,si)=>{const q=qlist(s[0]);if(q.length===1&&q[0]===k&&isDoneStep(s[1])&&S.ticks[`s${pi}-${si}`])found=true}));
+  return found;
+}
+const qp=()=>Object.keys(QUESTS).reduce((n,k)=>n+(questComplete(k)?QUESTS[k][1]:0),0);
+
+function tagEl(k){
+  const a=document.createElement("a");a.className="tag";a.textContent=k;const i=Object.keys(QUESTS).indexOf(k);a.style.color=`hsl(${(i*137)%360} 60% var(--tag-l))`;
+  a.href=W+QUESTS[k][2];a.target="_blank";a.rel="noopener";a.title=QUESTS[k][0]+" on the OSRS Wiki";return a;
+}
+
+/* quest panel */
+const qp_el=document.getElementById("qlist");
+Object.entries(QUESTS).forEach(([k,[name,pts]])=>{
+  const id="q-"+k;const lab=document.createElement("label");lab.className="qitem";lab.htmlFor=id;
+  const cb=document.createElement("input");cb.type="checkbox";cb.id=id;cb.checked=!!S.done[k];
+  cb.addEventListener("change",()=>{S.done[k]=cb.checked;save();refresh()});
+  const sp=document.createElement("span");sp.textContent=name;
+  const pt=document.createElement("small");pt.textContent=pts+" QP";
+  lab.append(cb,sp,pt);qp_el.appendChild(lab);
+});
+
+/* stats inputs */
+const st=document.getElementById("stats");
+SKILLS.forEach(([k,label])=>{
+  const id="st-"+k;const w=document.createElement("label");w.className="stat";w.htmlFor=id;
+  const t=document.createElement("span");t.textContent=label;
+  const inp=document.createElement("input");inp.type="number";inp.min=1;inp.max=k==="combat"?126:99;inp.id=id;inp.inputMode="numeric";inp.placeholder="–";
+  if(S.stats[k])inp.value=S.stats[k];
+  inp.addEventListener("input",()=>{const v=parseInt(inp.value,10);if(v>0)S.stats[k]=v;else delete S.stats[k];save();refresh()});
+  w.append(t,inp);st.appendChild(w);
+});
+
+/* requirement badges */
+function reqBadges(req,fight){
+  const out=[];
+  if(fight)out.push({cls:"fight",text:"Fight: "+fight});
+  if(!req)return out;
+  Object.entries(req).forEach(([k,v])=>{
+    let have,label;
+    if(k==="qp"){have=qp();label=v+" quest points";}
+    else{have=S.stats[k];label=(k==="combat"?"Combat ":SKILLS.find(s=>s[0]===k)[1]+" ")+v+(k==="combat"?"+ recommended":"");}
+    const cls=have==null?"req":(have>=v?"req ok":"req low");
+    out.push({cls,text:label+(have!=null&&have<v?` (you: ${have})`:"")});
+  });
+  return out;
+}
+
+/* render steps */
+const root=document.getElementById("phases");const rows=[];
+PHASES.forEach((p,pi)=>{
+  const s=document.createElement("section");
+  s.innerHTML=`<div class="phase-head"><span class="n">${pi+1}</span><h2>${p.name}</h2><span class="loc">${p.loc||""}</span></div>`;
+  if(p.inv&&p.inv.have){const iv=document.createElement("details");iv.className="inv";const sm=document.createElement("summary");sm.textContent="Inventory check";const a=document.createElement("p");a.innerHTML="<b>Have with you:</b> "+p.inv.have;iv.append(sm,a);if(p.inv.bank){const b=document.createElement("p");b.innerHTML="<b>Can go to the bank:</b> "+p.inv.bank;iv.appendChild(b)}s.appendChild(iv)}
+  const ul=document.createElement("ul");ul.className="steps";
+  p.steps.forEach(([q,text,o],si)=>{
+    o=o||{};const id=`s${pi}-${si}`;const qs=qlist(q);
+    const li=document.createElement("li");if(o.warn)li.classList.add("warn");
+    const cb=document.createElement("input");cb.type="checkbox";cb.id=id;cb.checked=!!S.ticks[id];
+    const tg=document.createElement("div");tg.className="tags";if(qs.length)qs.forEach(k=>tg.appendChild(tagEl(k)));else{const n=document.createElement("span");n.className="tag none";n.textContent="—";tg.appendChild(n)}
+    const lab=document.createElement("label");lab.htmlFor=id;lab.innerHTML=Array.isArray(text)?text[0]:text;
+    if(o.sub){const u=document.createElement("ul");o.sub.forEach(x=>{const l=document.createElement("li");l.textContent=x;u.appendChild(l)});lab.appendChild(u)}
+    li.append(cb,tg,lab);
+    const bw=document.createElement("div");bw.className="badges";li.appendChild(bw);
+    if(o.det){const d=document.createElement("details");d.className="more";const sm=document.createElement("summary");sm.textContent="Detailed steps";const ol=document.createElement("ol");o.det.forEach(x=>{const l=document.createElement("li");l.textContent=x;ol.appendChild(l)});d.append(sm,ol);li.appendChild(d)}
+    if(o.loc){const a=document.createElement("a");a.className="wlink";a.href=W+o.loc;a.target="_blank";a.rel="noopener";a.textContent="Location and pictures on the wiki ↗";li.appendChild(a)}
+    cb.addEventListener("change",()=>{S.ticks[id]=cb.checked;save();refresh()});
+    ul.appendChild(li);rows.push({li,cb,qs,o,bw});
+  });
+  s.appendChild(ul);root.appendChild(s);
+});
+
+/* later section */
+const later=document.getElementById("later");
+LATER.forEach(x=>{const d=document.createElement("div");d.dataset.q=x.q;
+  d.innerHTML=`<h3><a href="${W+QUESTS[x.q][2]}" target="_blank" rel="noopener">${x.title}</a></h3><p>${x.text}</p>`;
+  const bw=document.createElement("div");bw.className="badges";d.appendChild(bw);later.appendChild(d);x.bw=bw;x.el=d});
+
+function paintBadges(bw,req,fight){bw.innerHTML="";reqBadges(req,fight).forEach(b=>{const s=document.createElement("span");s.className="badge "+b.cls;s.textContent=b.text;bw.appendChild(s)});bw.hidden=!bw.children.length}
+
+function refresh(){
+  let total=0,ticked=0;
+  rows.forEach(r=>{
+    const skip=r.qs.length>0&&r.qs.every(k=>S.done[k]);
+    r.li.classList.toggle("skip",skip);r.li.classList.toggle("done",r.cb.checked);
+    r.cb.disabled=skip;
+    if(!skip){total++;if(r.cb.checked)ticked++}
+    paintBadges(r.bw,r.o.req,r.o.fight);
+  });
+  LATER.forEach(x=>{x.el.classList.toggle("skip",!!S.done[x.q]);paintBadges(x.bw,x.req)});
+  document.getElementById("count").textContent=`${ticked} / ${total}`;
+  document.getElementById("fill").style.width=(total?ticked/total*100:0)+"%";
+  document.getElementById("qp").textContent=qp();
+  document.getElementById("qdone").textContent=Object.keys(QUESTS).filter(questComplete).length;
+}
+refresh();
+
+const cf=document.getElementById("confirm");
+document.getElementById("reset").onclick=()=>{cf.hidden=false};
+document.getElementById("no").onclick=()=>{cf.hidden=true};
+document.getElementById("yes").onclick=()=>{S.ticks={};save();rows.forEach(r=>r.cb.checked=false);refresh();cf.hidden=true};
+
+</script>
+
+</body>
+</html>
