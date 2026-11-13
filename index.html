@@ -15,6 +15,7 @@ body{margin:0;font-size:14px}
 img{max-width:100%}
 [hidden]{display:none!important}
 .kofi{display:inline-flex;align-items:center;gap:8px;font:600 14px var(--body);color:var(--bg);background:var(--accent);padding:8px 14px;border-radius:999px;text-decoration:none;width:max-content}
+ul.steps>li.notready{box-shadow:inset 3px 0 0 var(--low);padding-left:8px;background:color-mix(in srgb,var(--low) 8%,transparent)}
 .kofi-float{position:fixed;z-index:20;right:calc(16px + env(safe-area-inset-right,0px));bottom:calc(16px + env(safe-area-inset-bottom,0px));box-shadow:0 4px 14px rgba(0,0,0,.25)}
 .wrap{padding-bottom:72px}
 @media (max-width:480px){.kofi-float{font-size:13px;padding:7px 12px}}
@@ -489,6 +490,7 @@ function refresh(){
     r.cb.disabled=skip;
     if(!skip){total++;if(r.cb.checked)ticked++}
     paintBadges(r.bw,r.o.req,r.o.fight);
+    r.li.classList.toggle("notready",!skip&&!!r.bw.querySelector(".low"));
   });
   LATER.forEach(x=>{x.el.classList.toggle("skip",!!S.done[x.q]);paintBadges(x.bw,x.req)});
   document.getElementById("count").textContent=`${ticked} / ${total}`;
