@@ -4,7 +4,7 @@ All 24 free-to-play Old School RuneScape quests as one walking route for ironmen
 
 Instead of doing each quest from start to finish, the route mixes steps from different quests by location, so you pick up items on the way instead of running back and forth. It starts in Lumbridge right after Learning the Ropes.
 
-**Open the route:** https://bengladine.github.io/osrs-quest-route
+**Open the route:** https://osrsroute.com
 
 ## What's in it
 
