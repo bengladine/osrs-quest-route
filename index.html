@@ -356,7 +356,7 @@ const PHASES=[
 ["BIM","Ancient Guardian: mine the 4 corner pillars, or kill it. Quest done",{fight:"Ancient Guardian (25), or mine the pillars",req:{mining:10}}]
 ]},
 {name:"Southern loop",loc:"Three bank trips",
- inv:{have:"Armour on. Trip 1: Prince Ali items, 3 beers, garlic, stake, hammer, ~12 food. Trip 2: 25 bones, imp beads, research notes. Trip 3: keys, ~10 food",bank:"Everything not needed for the current trip"},
+ inv:{have:"Armour on. Trip 1: Prince Ali items, 3 beers, garlic, stake, hammer, ~12 food. Trip 2: 4 imp beads and 24 bones (exactly 28 slots); research notes and the last bone on a second short run. Trip 3: keys, ~10 food",bank:"Everything not needed for the current trip"},
  steps:[
 [["PA","VS","GD","KS"],"<b>Trip 1</b>, Lumbridge bank: take the trip 1 items, plus 2 woad leaves, 5 coins and the pie ingredients",{sub:["All banks share the same storage"]}],
 ["KS","Make the <b>redberry pie</b> on the castle range: flour + water → pastry dough, dough in the pie dish, add redberries, bake",{req:{cooking:10}}],
@@ -364,8 +364,8 @@ const PHASES=[
 ["PA","Talk to <b>Leela</b> with all the disguise items, then give <b>Joe</b> 3 beers (\"I have some beer here, fancy one?\")",{loc:"Leela"}],
 ["PA","Use the rope on Lady Keli, open the cell with the bronze key, talk to <b>Ali</b>",{}],
 ["VS","Draynor Manor basement: kill <b>Count Draynor</b>. Garlic in inventory, stake and hammer with you. Quest done",{fight:"Count Draynor (34)",req:{combat:25},loc:"Count_Draynor"}],
-["IC","<b>Trip 2</b>: collect beads (best spot: Falador's south entrance), take the 25 bones, then Wizards' Tower: give Mizgog all 4 beads. Quest done",{sub:["1 red, 1 yellow, 1 black, 1 white; about 5 in 128 kills per colour"],loc:"Imp"}],
-["DEM","Give the 25 bones to <b>Wizard Traiborn</b> for key 3",{det:["Ask him about the key; he's forgotten.","Ask if he has any keys knocking around.","Hand over the bones (in parts is fine)."],loc:"Wizard_Traiborn"}],
+["IC","<b>Trip 2</b>: collect beads (best spot: Falador's south entrance), then from the bank take the 4 beads + 24 bones (exactly 28). Wizards' Tower: give Mizgog all 4 beads. Quest done",{sub:["1 red, 1 yellow, 1 black, 1 white; about 5 in 128 kills per colour"],loc:"Imp"}],
+["DEM","Give the 25 bones to <b>Wizard Traiborn</b> for key 3",{det:["Ask him about the key; he's forgotten.","Ask if he has any keys knocking around.","Give him the 24 bones you brought; he keeps count.","Fetch the last bone and the research notes from Draynor bank, give Traiborn the bone for the key."],loc:"Wizard_Traiborn"}],
 ["RM","Give the research notes to <b>Archmage Sedridor</b> in the basement. Quest done",{}],
 ["CC","Optional now: The Corsair Curse, from Captain Tock at the crossroads north of Port Sarim. Tick when the quest is done",{fight:"Ithoi the Navigator (35), magic",req:{combat:25},det:["Agree to help Captain Tock and sail from the dock west of Rimmington.","Talk to Ithoi, then Arsen, Colin and Gnocci (upstairs in their huts).","Arsen: get the ogre artefact from Tock, show it to Chief Tess at the dungeon entrance, report back.","Colin: look through Ithoi's telescope, report back.","Gnocci: dig at the sand lump west of Ithoi's hut, report back.","Talk to Tock, then Gnocci, then Arsen.","Accuse Ithoi of cooking the meal and say the Captain plans to fire him. Light the driftwood under his hut with a tinderbox.","Tell Tock, kill Ithoi, talk to Tock again."],loc:"Captain_Tock"}],
 ["DEM","<b>Trip 3</b>: give all 3 keys to Sir Prysin for <b>Silverlight</b>",{}],
