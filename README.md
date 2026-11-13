@@ -20,6 +20,10 @@ Instead of doing each quest from start to finish, the route mixes steps from dif
 
 Open an issue with the "Route mistake" template. Mention the section and step, what the guide says, and what actually happened in game.
 
+## Support
+
+The route is free and stays free. If it saved you time, you can [buy me a coffee](https://ko-fi.com/gladinathor).
+
 ## Credits
 
 Quest facts checked against the [OSRS Wiki](https://oldschool.runescape.wiki). Route and step notes written by the author.
