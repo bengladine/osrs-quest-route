@@ -15,6 +15,9 @@ body{margin:0;font-size:14px}
 img{max-width:100%}
 [hidden]{display:none!important}
 .kofi{display:inline-flex;align-items:center;gap:8px;font:600 14px var(--body);color:var(--bg);background:var(--accent);padding:8px 14px;border-radius:999px;text-decoration:none;width:max-content}
+.kofi-float{position:fixed;z-index:20;right:calc(16px + env(safe-area-inset-right,0px));bottom:calc(16px + env(safe-area-inset-bottom,0px));box-shadow:0 4px 14px rgba(0,0,0,.25)}
+.wrap{padding-bottom:72px}
+@media (max-width:480px){.kofi-float{font-size:13px;padding:7px 12px}}
 .kofi:hover{filter:brightness(1.08)}
 .support{display:flex;flex-wrap:wrap;align-items:center;gap:10px;color:var(--muted);font-size:14px}
 
@@ -180,6 +183,7 @@ footer{color:var(--muted);font-size:13px}
   <footer>Route and step notes written by the author. Quest facts checked against the <a href="https://oldschool.runescape.wiki" target="_blank" rel="noopener">OSRS Wiki</a>, where you'll find maps and screenshots for every step. Found a mistake? <a href="https://github.com/bengladine/osrs-quest-route/issues/new?template=route-mistake.md" target="_blank" rel="noopener">Report it on GitHub</a> so it can be fixed. Created using intellectual property belonging to Jagex Limited under the terms of Jagex's Fan Content Policy. This content is not endorsed by or affiliated with Jagex.</footer>
 </div>
 
+<a class="kofi kofi-float" href="https://ko-fi.com/gladinathor" target="_blank" rel="noopener" aria-label="Buy me a coffee on Ko-fi">Buy me a coffee</a>
 <script>
 const QUESTS={
 LTR:["Learning the Ropes",1,"Learning_the_Ropes"],
