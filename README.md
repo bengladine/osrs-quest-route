@@ -9,7 +9,8 @@ Instead of doing each quest from start to finish, the route mixes steps from dif
 ## What's in it
 
 - One ordered checklist across every F2P quest, in 10 sections
-- Mark quests you've already done and their steps are crossed out
+- Set each quest to Doing, Done or Skip: done quests are crossed out, skipped quests disappear from the route
+- Dragon Slayer I and the solo part of Shield of Arrav are built in; the partner part has its own section
 - Fill in your combat and skill levels to get warnings at steps you're not ready for
 - Quest points counted automatically for quest requirements
 - An inventory check per section: what to carry and what can stay in the bank

@@ -16,6 +16,10 @@ img{max-width:100%}
 [hidden]{display:none!important}
 .kofi{display:inline-flex;align-items:center;gap:8px;font:600 14px var(--body);color:var(--bg);background:var(--accent);padding:8px 14px;border-radius:999px;text-decoration:none;width:max-content}
 ul.steps>li.notready{box-shadow:inset 3px 0 0 var(--low);padding-left:8px;background:color-mix(in srgb,var(--low) 8%,transparent)}
+.qitem select{margin-left:6px;font:500 12px var(--body);padding:2px 4px;border:1px solid var(--line);border-radius:5px;background:var(--bg);color:var(--fg)}
+.emptynote{margin:0;color:var(--muted);font-size:14px}
+.warnbox{border:1px solid var(--low);background:color-mix(in srgb,var(--low) 10%,var(--surface))}
+.warnbox button{margin-left:6px}
 .kofi-float{position:fixed;z-index:20;right:calc(16px + env(safe-area-inset-right,0px));bottom:calc(16px + env(safe-area-inset-bottom,0px));box-shadow:0 4px 14px rgba(0,0,0,.25)}
 .wrap{padding-bottom:72px}
 @media (max-width:480px){.kofi-float{font-size:13px;padding:7px 12px}}
@@ -150,12 +154,13 @@ footer{color:var(--muted);font-size:13px}
     <div id="stats" aria-label="Your levels"></div>
     <p class="note" style="margin:0">Fill in your levels and the route warns you (orange) at steps you're not ready for. Leave a box empty to skip that check.</p>
     <details>
-      <summary>Quests you've already done</summary>
-      <p style="margin:8px 0;color:var(--muted);font-size:14px">Tick a quest and all its steps are crossed out. Steps that serve several quests stay until all of them are done.</p>
+      <summary>Quests: doing, done or skip</summary>
+      <p style="margin:8px 0;color:var(--muted);font-size:14px">Done: its steps are crossed out. Skip: its steps disappear, for quests you don't meet the requirements for or don't want to do. Steps that serve several quests stay until none of those quests is still on Doing.</p>
       <div id="qlist"></div>
     </details>
   </section>
 
+  <p id="dswarn" class="note warnbox" hidden>Dragon Slayer is on, but your combat is <strong id="dsc"></strong>. Elvarg (83) and the lesser demon (82) are tough below about 40. You'll gain levels along the route, so keeping it is fine. <button id="dsskip" type="button">Skip Dragon Slayer</button></p>
   <div class="progress">
     <div class="bar" aria-hidden="true"><i id="fill"></i></div>
     <span class="count" id="count">0 / 0</span>
@@ -170,10 +175,7 @@ footer{color:var(--muted);font-size:13px}
 
   <div id="phases"></div>
 
-  <section>
-    <div class="phase-head"><h2>After the route</h2></div>
-    <div class="later" id="later"></div>
-  </section>
+
 
   
   <div class="support" style="margin-top:8px">
@@ -355,6 +357,11 @@ const PHASES=[
 ["DEM","Key 2: fill your bucket at the palace kitchen sink, pour it down the drain outside the kitchen, then get the key in the sewers",{det:["The drain is against the wall just north of the kitchen door.","The manhole is just south of the palace's east wall (dungeon icon on the minimap).","In the sewer, head north-west to a stream. The rusty key is in a muddy patch next to a pile of skeletons."],loc:"Varrock_Sewers"}],
 ["RM","Give the research package to <b>Aubury</b> in his rune shop south-east of Varrock Square. You get <b>research notes</b>",{loc:"Aubury"}],
 ["KS","Ask <b>Reldo</b> in the library on the ground floor of Varrock Palace about the Imcando dwarves",{loc:"Reldo"}],
+["SOA","Shield of Arrav: ask <b>Reldo</b> (same library) for a quest, find the book <b>The Shield of Arrav</b> on the bookcases and read it, then talk to Reldo again",{id:"soa-1",sub:["You join one of two gangs. The solo-friendly choice is the Phoenix Gang (below). Your partner later needs to be in the Black Arm Gang"],loc:"Reldo"}],
+["SOA","Phoenix Gang: ask <b>Baraek</b> at the fur stall in Varrock Square about the Phoenix Gang (20 coins)",{id:"soa-2",loc:"Baraek"}],
+["SOA","Go down the ladder in the southern room of the <b>Phoenix Gang hideout</b>, in the alley just east of the Blue Moon Inn. Tell <b>Straven</b> you know who he is and offer your services",{id:"soa-3",loc:"Straven"}],
+["SOA","Kill <b>Jonny the Beard</b> in the Blue Moon Inn and bring his <b>intel report</b> to Straven. Keep the <b>weapon store key</b> he gives you",{id:"soa-4",fight:"Jonny the Beard (2)",sub:["Don't wear a ring of recoil: if it kills him, he drops no report"],loc:"Jonny_the_beard"}],
+["SOA","Open the chest in the south-west corner of the hideout for <b>half of the shield</b>, then give it to <b>Curator Haig Halen</b> in Varrock Museum for a <b>certificate half</b>",{id:"soa-5",sub:["You can only hold one shield half at a time"],loc:"Curator_Haig_Halen"}],
 ["PA","Buy a <b>pink skirt</b> from Thessalia's clothes shop on the west side of Varrock Square (2 coins)",{loc:"Thessalia"}],
 ["BIM","Give the sandwich to <b>Marley</b> in Edgeville",{}],
 ["BIM","Talk to <b>Willow</b> at the Camdozaal entrance on the west side of Ice Mountain (\"Yes\")",{}],
@@ -387,18 +394,43 @@ const PHASES=[
 ["GD","Dye 1 mail orange and 1 blue, leave 1 plain. Give the generals orange, then blue, then plain. Quest done",{loc:"General_Bentnoze"}],
 ["KS","Give Thurgo the portrait, then mine <b>blurite ore</b> in the Asgarnian Ice Dungeon east of him",{fight:"Ice warriors (57) and ice giants (53): run",req:{mining:10},warn:true,loc:"Asgarnian_Ice_Dungeon"}],
 ["KS","Give Thurgo the blurite and 2 iron bars for the sword, then bring it to the Squire. Quest done",{}]
+]},
+{name:"Dragon Slayer I",loc:"Needs 32 quest points. Starts at the Champions' Guild, south-west of Varrock",
+ inv:{have:"Hammer, 3 planks, 90 steel nails, 2,000 coins, silk, lobster pot, wizard's mind bomb, unfired bowl, food, and law + air runes if you'll Telegrab",bank:"Everything else"},
+ steps:[
+["DRG","Prep: smelt <b>6 steel bars</b> (1 iron + 2 coal each) and smith them into <b>90 steel nails</b> (15 per bar)",{id:"drg-1",req:{smithing:34,mining:30},sub:["Coal needs 30 Mining; steel bars need 30 Smithing and nails need 34"]}],
+["DRG","Prep: collect <b>3 planks</b>. Ironmen can't buy them, so pick them up where they spawn",{id:"drg-2",sub:["The wiki's Plank page lists the free-to-play spawn spots"],loc:"Plank"}],
+["DRG","Talk to the <b>Guildmaster</b> inside the Champions' Guild, south-west of Varrock (needs 32 quest points to enter)",{id:"drg-3",req:{qp:32},loc:"Guildmaster"}],
+["DRG","Talk to <b>Oziach</b> in his hut in Edgeville, by the yew trees, about the rune platebody",{id:"drg-4",loc:"Oziach"}],
+["DRG","Back to the Guildmaster: ask how to get to Crandor and about each map piece. You get the <b>maze key</b>",{id:"drg-5",sub:["Ask about all three map pieces and the ship, or the quest won't move on"]}],
+["DRG","Thalzar's piece: talk to the <b>Oracle</b> on top of Ice Mountain, then use the silk, lobster pot, wizard's mind bomb and unfired bowl on the <b>magic door</b> in the Dwarven Mine. Open the chest behind it",{id:"drg-6",loc:"Oracle"}],
+["DRG","Melzar's piece: enter <b>Melzar's Maze</b> in Rimmington with the maze key and work through the doors",{id:"drg-7",fight:"Melzar the Mad (43), lesser demon (82)",req:{combat:40},warn:true,det:["Zombie rat (long tail): its key opens the northmost door. Climb the ladder.","Ghost: its key opens the second door from the north on the east wall. Climb the ladder.","Skeleton: its key opens the westmost door on the south wall. Climb down the ladders.","Zombie: its key opens the blue door.","Melzar the Mad (level 43): his key opens the magenta door.","Lesser demon (level 82): its key opens the green door. It can be safespotted with Magic or Ranged.","Open the chest for the map piece."],loc:"Melzar%27s_Maze"}],
+["DRG","Lozar's piece: in the Port Sarim jail, either pay <b>Wormbrain</b> 10,000 coins, or kill him through the bars with Magic or Ranged and Telegrab the piece (33 Magic)",{id:"drg-8",req:{magic:33},loc:"Wormbrain"}],
+["DRG","Use the three map pieces on each other for the <b>Crandor map</b>",{id:"drg-9"}],
+["DRG","Buy the <b>Lady Lumbridge</b> from <b>Klarense</b> on the Port Sarim docks (2,000 coins). Go below deck and repair the hole 3 times with a plank, 30 nails and your hammer",{id:"drg-10",loc:"Klarense"}],
+["DRG","Ask <b>Ned</b> in Draynor (house in the middle of the village) to captain the ship. Have the Crandor map with you",{id:"drg-11",loc:"Ned"}],
+["DRG","Get the <b>anti-dragon shield</b> from <b>Duke Horacio</b> upstairs in Lumbridge Castle, and bank for food",{id:"drg-12",loc:"Duke_Horacio"}],
+["DRG","Sail from Port Sarim with Ned to Crandor, climb the volcano, go down the hole and kill <b>Elvarg</b>. Quest done",{id:"drg-13",fight:"Elvarg (83)",req:{combat:45},warn:true,det:["Wear the anti-dragon shield: without it her fire hits very hard.","Bring as much food as you can carry.","A long but safe spot is the south-east corner of her cave.","After the kill, go back to Oziach to be allowed to buy the rune platebody."],loc:"Elvarg"}]
+]},
+{name:"Shield of Arrav: with a partner",loc:"Do this whenever you find someone from the Black Arm Gang",
+ inv:{have:"Your certificate half and the weapon store key",bank:""},
+ steps:[
+["SOA","Find a partner who joined the <b>Black Arm Gang</b>. The SOA chat channel in game is the usual place to look",{id:"soa-6"}],
+["SOA","Use your <b>weapon store key</b> on your partner so they can finish their part. Ironmen can't trade, so you use items on each other",{id:"soa-7"}],
+["SOA","Once both of you have a certificate half, use your half on your partner and take theirs. Combine the two halves",{id:"soa-8"}],
+["SOA","Give the full certificate to <b>King Roald</b> on the ground floor of Varrock Palace. Quest done",{id:"soa-9",loc:"King_Roald"}]
 ]}
 ];
 
-const LATER=[
-{q:"SOA",title:"Shield of Arrav",text:"Needs a second player from the other gang. Start with Reldo in the Varrock palace library. Ironmen use the certificate halves on each other instead of trading. Find a partner in the SOA chat channel."},
-{q:"DRG",title:"Dragon Slayer I",text:"Needs 32 quest points. Bring the silk, lobster pot, mind bomb and unfired bowl from this route. Also needed: 3 planks, 90 steel nails (34 Smithing), a hammer, 2,000 coins for the ship, and 33 Magic or 10,000 coins for Wormbrain's map piece. Elvarg is level 83: aim for combat 45+ and the anti-dragon shield from Duke Horacio.",req:{qp:32,combat:45,smithing:34}}
-];
+const LATER=[];
 
 const W="https://oldschool.runescape.wiki/w/";
 const KEY="f2p-route-full-v1";
-let S={ticks:{},done:{LTR:true},stats:{}};
+let S={ticks:{},done:{},status:{LTR:"done"},stats:{}};
 try{const raw=localStorage.getItem(KEY);if(raw)S=Object.assign(S,JSON.parse(raw))}catch(e){}
+if(!S.status)S.status={};
+if(S.done){for(const k in S.done)if(S.done[k]&&!S.status[k])S.status[k]="done";S.done={}}
+const stOf=k=>S.status[k]||"doing";
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
 const qlist=q=>q===""?[]:(Array.isArray(q)?q:[q]);
 const SKILLS=[["combat","Combat"],["mining","Mining"],["smithing","Smithing"],["cooking","Cooking"],["crafting","Crafting"],["magic","Magic"]];
@@ -406,9 +438,10 @@ const isDoneStep=(text)=>/Quest done|quest is done/.test(text);
 
 /* quest points: quests marked done, plus quests whose "Quest done" step is ticked */
 function questComplete(k){
-  if(S.done[k])return true;
+  if(stOf(k)==="done")return true;
+  if(stOf(k)==="skip")return false;
   let found=false;
-  PHASES.forEach((p,pi)=>p.steps.forEach((s,si)=>{const q=qlist(s[0]);if(q.length===1&&q[0]===k&&isDoneStep(s[1])&&S.ticks[`s${pi}-${si}`])found=true}));
+  rows.forEach(r=>{if(r.qs.length===1&&r.qs[0]===k&&r.finish&&S.ticks[r.cb.id])found=true});
   return found;
 }
 const qp=()=>Object.keys(QUESTS).reduce((n,k)=>n+(questComplete(k)?QUESTS[k][1]:0),0);
@@ -419,14 +452,16 @@ function tagEl(k){
 }
 
 /* quest panel */
-const qp_el=document.getElementById("qlist");
+const qp_el=document.getElementById("qlist");const qsel={};
 Object.entries(QUESTS).forEach(([k,[name,pts]])=>{
   const id="q-"+k;const lab=document.createElement("label");lab.className="qitem";lab.htmlFor=id;
-  const cb=document.createElement("input");cb.type="checkbox";cb.id=id;cb.checked=!!S.done[k];
-  cb.addEventListener("change",()=>{S.done[k]=cb.checked;save();refresh()});
   const sp=document.createElement("span");sp.textContent=name;
   const pt=document.createElement("small");pt.textContent=pts+" QP";
-  lab.append(cb,sp,pt);qp_el.appendChild(lab);
+  const sel=document.createElement("select");sel.id=id;
+  [["doing","Doing"],["done","Done"],["skip","Skip"]].forEach(([v,t])=>{const o=document.createElement("option");o.value=v;o.textContent=t;sel.appendChild(o)});
+  sel.value=stOf(k);
+  sel.addEventListener("change",()=>{if(sel.value==="doing")delete S.status[k];else S.status[k]=sel.value;save();refresh()});
+  lab.append(sp,pt,sel);qp_el.appendChild(lab);qsel[k]=sel;
 });
 
 /* stats inputs */
@@ -456,14 +491,15 @@ function reqBadges(req,fight){
 }
 
 /* render steps */
-const root=document.getElementById("phases");const rows=[];
+const root=document.getElementById("phases");const rows=[];const sections=[];
 PHASES.forEach((p,pi)=>{
   const s=document.createElement("section");
   s.innerHTML=`<div class="phase-head"><span class="n">${pi+1}</span><h2>${p.name}</h2><span class="loc">${p.loc||""}</span></div>`;
   if(p.inv&&p.inv.have){const iv=document.createElement("details");iv.className="inv";const sm=document.createElement("summary");sm.textContent="Inventory check";const a=document.createElement("p");a.innerHTML="<b>Have with you:</b> "+p.inv.have;iv.append(sm,a);if(p.inv.bank){const b=document.createElement("p");b.innerHTML="<b>Can go to the bank:</b> "+p.inv.bank;iv.appendChild(b)}s.appendChild(iv)}
   const ul=document.createElement("ul");ul.className="steps";
-  p.steps.forEach(([q,text,o],si)=>{
-    o=o||{};const id=`s${pi}-${si}`;const qs=qlist(q);
+  let pos=0;
+  p.steps.forEach(([q,text,o])=>{
+    o=o||{};const id=o.id||`s${pi}-${pos++}`;const qs=qlist(q);
     const li=document.createElement("li");if(o.warn)li.classList.add("warn");
     const cb=document.createElement("input");cb.type="checkbox";cb.id=id;cb.checked=!!S.ticks[id];
     const tg=document.createElement("div");tg.className="tags";if(qs.length)qs.forEach(k=>tg.appendChild(tagEl(k)));else{const n=document.createElement("span");n.className="tag none";n.textContent="—";tg.appendChild(n)}
@@ -474,30 +510,33 @@ PHASES.forEach((p,pi)=>{
     if(o.det){const d=document.createElement("details");d.className="more";const sm=document.createElement("summary");sm.textContent="Detailed steps";const ol=document.createElement("ol");o.det.forEach(x=>{const l=document.createElement("li");l.textContent=x;ol.appendChild(l)});d.append(sm,ol);li.appendChild(d)}
     if(o.loc){const a=document.createElement("a");a.className="wlink";a.href=W+o.loc;a.target="_blank";a.rel="noopener";a.textContent="Location and pictures on the wiki ↗";li.appendChild(a)}
     cb.addEventListener("change",()=>{S.ticks[id]=cb.checked;save();refresh()});
-    ul.appendChild(li);rows.push({li,cb,qs,o,bw});
+    ul.appendChild(li);rows.push({li,cb,qs,o,bw,finish:isDoneStep(Array.isArray(text)?text[0]:text)});
   });
-  s.appendChild(ul);root.appendChild(s);
+  s.appendChild(ul);const em=document.createElement("p");em.className="emptynote";em.textContent="Nothing left to do here.";em.hidden=true;s.appendChild(em);root.appendChild(s);sections.push({s,ul,em});
 });
 
-/* later section */
-const later=document.getElementById("later");
-LATER.forEach(x=>{const d=document.createElement("div");d.dataset.q=x.q;
-  d.innerHTML=`<h3><a href="${W+QUESTS[x.q][2]}" target="_blank" rel="noopener">${x.title}</a></h3><p>${x.text}</p>`;
-  const bw=document.createElement("div");bw.className="badges";d.appendChild(bw);later.appendChild(d);x.bw=bw;x.el=d});
+document.getElementById("dsskip").onclick=()=>{S.status.DRG="skip";save();refresh()};
 
 function paintBadges(bw,req,fight){bw.innerHTML="";reqBadges(req,fight).forEach(b=>{const s=document.createElement("span");s.className="badge "+b.cls;s.textContent=b.text;bw.appendChild(s)});bw.hidden=!bw.children.length}
 
 function refresh(){
   let total=0,ticked=0;
   rows.forEach(r=>{
-    const skip=r.qs.length>0&&r.qs.every(k=>S.done[k]);
-    r.li.classList.toggle("skip",skip);r.li.classList.toggle("done",r.cb.checked);
+    const active=r.qs.length===0||r.qs.some(k=>stOf(k)==="doing");
+    const gone=!active&&r.qs.every(k=>stOf(k)==="skip");
+    const skip=!active;
+    r.li.hidden=gone;
+    r.li.classList.toggle("skip",skip&&!gone);r.li.classList.toggle("done",r.cb.checked);
     r.cb.disabled=skip;
     if(!skip){total++;if(r.cb.checked)ticked++}
     paintBadges(r.bw,r.o.req,r.o.fight);
     r.li.classList.toggle("notready",!skip&&!!r.bw.querySelector(".low"));
   });
-  LATER.forEach(x=>{x.el.classList.toggle("skip",!!S.done[x.q]);paintBadges(x.bw,x.req)});
+  sections.forEach(x=>{const lis=[...x.ul.children];const left=lis.some(li=>!li.hidden&&!li.classList.contains("skip"));x.ul.hidden=!left;x.em.hidden=left;const iv=x.s.querySelector(".inv");if(iv)iv.hidden=!left});
+  Object.entries(qsel).forEach(([k,sel])=>{sel.value=stOf(k)});
+  const c=S.stats.combat,dw=document.getElementById("dswarn");
+  dw.hidden=!(stOf("DRG")==="doing"&&c&&c<40);
+  if(!dw.hidden)document.getElementById("dsc").textContent=c;
   document.getElementById("count").textContent=`${ticked} / ${total}`;
   document.getElementById("fill").style.width=(total?ticked/total*100:0)+"%";
   document.getElementById("qp").textContent=qp();
