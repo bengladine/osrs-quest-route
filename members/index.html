@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Members Ironman Quest Route</title>
+<link rel="canonical" href="https://osrsroute.com/members/">
+<meta name="description" content="An OSRS members ironman quest route in chapters: members and free-to-play quests interleaved by location, with inventory checks, dialogue options and requirement warnings. Load your account by name.">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,500..800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap">
+<link rel="stylesheet" href="/assets/route.css">
+</head>
+<body>
+
+
+<div class="wrap">
+  <nav class="topnav"><a href="/">All routes</a><span aria-hidden="true">·</span><a href="/f2p/">F2P route</a></nav>
+  <header>
+    <h1>Members Ironman Quest Route</h1>
+    <p class="lede">The members quests for ironmen, in chapters. Members and free-to-play quests are mixed by location, so you pick things up on the way and every quest unlocks the next. Progress is shared with the F2P route: a quest done there is crossed out here too.</p>
+    <div class="chapters" aria-label="Chapters"><span class="chip on">Chapter 1: Getting started</span><span class="chip">Chapter 2: Ardougne (coming)</span><span class="chip">Chapter 3 (coming)</span></div>
+  </header>
+
+  <div class="support">
+    <a class="kofi" href="https://ko-fi.com/gladinathor" target="_blank" rel="noopener">Buy me a coffee</a>
+    <span>The route is and stays free. Tips help me keep it up to date.</span>
+  </div>
+
+
+  <section class="panel" aria-labelledby="you-h">
+    <h2 id="you-h">Your account</h2>
+    <div class="panel-row"><span>Quest points: <strong id="qp">0</strong> / <span id="qptotal"></span></span><span>Quests done: <strong id="qdone">0</strong> / <span id="qtotal"></span></span></div>
+    <form id="lookup" class="lookup">
+      <label for="rsn">RuneScape name</label>
+      <div class="lookup-row"><input id="rsn" type="text" autocomplete="off" spellcheck="false" maxlength="12" placeholder="Your in-game name"><button id="loadbtn" type="submit">Load my account</button></div>
+      <p id="lookupmsg" class="hint" role="status"></p>
+    </form>
+    <div id="stats" aria-label="Your levels"></div>
+    <p class="note" style="margin:0">Fill in your levels and the route warns you (orange) at steps you're not ready for. Leave a box empty to skip that check.</p>
+    <details>
+      <summary>Quests: doing, done or skip</summary>
+      <p style="margin:8px 0;color:var(--muted);font-size:14px">Done: its steps are crossed out. Skip: its steps disappear, for quests you don't meet the requirements for or don't want to do. Steps that serve several quests stay until none of those quests is still on Doing.</p>
+      <div id="qlist"></div>
+    </details>
+  </section>
+
+  
+  <div class="progress">
+    <div class="bar" aria-hidden="true"><i id="fill"></i></div>
+    <span class="count" id="count">0 / 0</span>
+    <button id="reset" type="button">Reset ticks</button>
+  </div>
+  <p id="confirm" class="note" hidden>Untick every step? Your quest list and levels stay. <button id="yes" type="button">Yes, reset</button> <button id="no" type="button">Cancel</button></p>
+
+  <p class="note"><strong>Order:</strong> chapter 1 follows the start of the OSRS Wiki's optimal ironman quest order. A few quests start here and finish in a later chapter (Pirate's Treasure, Vampyre Slayer, Enter the Abyss); those steps say so.</p>
+  <p class="note"><strong>Lamps:</strong> where a step says where to spend an XP lamp, that's to reach the levels the next quests need.</p>
+  <p class="note"><strong>Coins:</strong> the Stronghold of Security pays 10,000 coins early on. You'll need most of it for the Lumber Yard and travel.</p>
+  <p class="note"><strong>Armour and run energy:</strong> weight doesn't slow you down, but it drains run energy faster. Travel light through towns and put armour on for the fights.</p>
+  <p class="note"><strong>Dialogue:</strong> where you must pick a specific chat option, it's in the step or under "Detailed steps". If an NPC doesn't mention your quest, look for "Talk about something else".</p>
+
+  <div id="phases"></div>
+
+
+
+  
+  <div class="support" style="margin-top:8px">
+    <a class="kofi" href="https://ko-fi.com/gladinathor" target="_blank" rel="noopener">Buy me a coffee</a>
+    <span>The route is and stays free. Tips help me keep it up to date.</span>
+  </div>
+
+  <footer>Route and step notes written by the author. Quest facts checked against the <a href="https://oldschool.runescape.wiki" target="_blank" rel="noopener">OSRS Wiki</a>, where you'll find maps and screenshots for every step. Found a mistake? <a href="https://github.com/bengladine/osrs-quest-route/issues/new?template=route-mistake.md" target="_blank" rel="noopener">Report it on GitHub</a> so it can be fixed. Created using intellectual property belonging to Jagex Limited under the terms of Jagex's Fan Content Policy. This content is not endorsed by or affiliated with Jagex.</footer>
+</div>
+
+<a class="kofi kofi-float" href="https://ko-fi.com/gladinathor" target="_blank" rel="noopener" aria-label="Buy me a coffee on Ko-fi">Buy me a coffee</a>
+<script>
+window.ROUTE_KEY="members-route-v1";
+</script>
+<script src="data.js"></script>
+<script src="/assets/route.js"></script>
+</body>
+</html>

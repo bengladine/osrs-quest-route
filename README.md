@@ -1,6 +1,6 @@
-# F2P Ironman Quest Route
+# OSRS Ironman Quest Routes
 
-All 25 free-to-play Old School RuneScape quests as one walking route for ironmen.
+Old School RuneScape quest routes for ironmen: the F2P route (all free-to-play quests) and the members route (in chapters).
 
 Instead of doing each quest from start to finish, the route mixes steps from different quests by location, so you pick up items on the way instead of running back and forth. It starts in Lumbridge right after Learning the Ropes.
 
