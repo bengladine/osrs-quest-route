@@ -20,6 +20,12 @@ ul.steps>li.notready{box-shadow:inset 3px 0 0 var(--low);padding-left:8px;backgr
 .emptynote{margin:0;color:var(--muted);font-size:14px}
 .warnbox{border:1px solid var(--low);background:color-mix(in srgb,var(--low) 10%,var(--surface))}
 .warnbox button{margin-left:6px}
+.lookup{display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--muted)}
+.lookup-row{display:flex;flex-wrap:wrap;gap:8px}
+.lookup input{flex:1 1 180px;min-width:0;font:500 15px var(--body);padding:7px 10px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--fg)}
+.lookup .hint{margin:0}
+.lookup .hint.ok{color:var(--ok)}
+.lookup .hint.err{color:var(--low)}
 .kofi-float{position:fixed;z-index:20;right:calc(16px + env(safe-area-inset-right,0px));bottom:calc(16px + env(safe-area-inset-bottom,0px));box-shadow:0 4px 14px rgba(0,0,0,.25)}
 .wrap{padding-bottom:72px}
 @media (max-width:480px){.kofi-float{font-size:13px;padding:7px 12px}}
@@ -151,6 +157,11 @@ footer{color:var(--muted);font-size:13px}
   <section class="panel" aria-labelledby="you-h">
     <h2 id="you-h">Your account</h2>
     <div class="panel-row"><span>Quest points: <strong id="qp">0</strong> / 47</span><span>Quests done: <strong id="qdone">0</strong> / 25</span></div>
+    <form id="lookup" class="lookup">
+      <label for="rsn">RuneScape name</label>
+      <div class="lookup-row"><input id="rsn" type="text" autocomplete="off" spellcheck="false" maxlength="12" placeholder="Your in-game name"><button id="loadbtn" type="submit">Load my account</button></div>
+      <p id="lookupmsg" class="hint" role="status"></p>
+    </form>
     <div id="stats" aria-label="Your levels"></div>
     <p class="note" style="margin:0">Fill in your levels and the route warns you (orange) at steps you're not ready for. Leave a box empty to skip that check.</p>
     <details>
@@ -549,6 +560,46 @@ document.getElementById("reset").onclick=()=>{cf.hidden=false};
 document.getElementById("no").onclick=()=>{cf.hidden=true};
 document.getElementById("yes").onclick=()=>{S.ticks={};save();rows.forEach(r=>r.cb.checked=false);refresh();cf.hidden=true};
 
+
+/* account lookup: WikiSync (quests + levels), Wise Old Man (levels) as fallback */
+const norm=t=>String(t).toLowerCase().replace(/[’`]/g,"'").replace(/&/g,"and").replace(/^the /,"").replace(/[^a-z0-9]/g,"");
+const QBYNAME={};Object.entries(QUESTS).forEach(([k,[n]])=>QBYNAME[norm(n)]=k);
+function combatLevel(L){const g=k=>L[k]||1;const base=0.25*(g("defence")+(L.hitpoints||10)+Math.floor(g("prayer")/2));
+  return Math.floor(base+Math.max(0.325*(g("attack")+g("strength")),0.325*Math.floor(g("ranged")*1.5),0.325*Math.floor(g("magic")*1.5)))}
+function applyLevels(L){
+  ["mining","smithing","cooking","crafting","magic"].forEach(k=>{if(L[k]){S.stats[k]=L[k];const i=document.getElementById("st-"+k);if(i)i.value=L[k]}});
+  const c=combatLevel(L);S.stats.combat=c;const ci=document.getElementById("st-combat");if(ci)ci.value=c;
+}
+const lmsg=document.getElementById("lookupmsg");
+function say(t,cls){lmsg.textContent=t;lmsg.className="hint"+(cls?" "+cls:"")}
+if(S.rsn)document.getElementById("rsn").value=S.rsn;
+document.getElementById("lookup").addEventListener("submit",async e=>{
+  e.preventDefault();
+  const name=document.getElementById("rsn").value.trim();
+  if(!name){say("Type your in-game name first.","err");return}
+  S.rsn=name;save();
+  const btn=document.getElementById("loadbtn");btn.disabled=true;say("Looking up "+name+"…");
+  let gotQuests=false,gotLevels=false;
+  try{
+    const r=await fetch("https://sync.runescape.wiki/runelite/player/"+encodeURIComponent(name)+"/STANDARD");
+    if(r.ok){const d=await r.json();
+      if(d.quests){let n=0;Object.entries(d.quests).forEach(([qn,v])=>{const k=QBYNAME[norm(qn)];if(k&&v===2&&stOf(k)!=="done"){S.status[k]="done";n++}});gotQuests=true;
+        if(d.levels){const L={};Object.entries(d.levels).forEach(([k,v])=>L[k.toLowerCase()]=v);applyLevels(L);gotLevels=true}
+        save();refresh();say("Loaded from WikiSync: "+n+" more quest"+(n===1?"":"s")+" marked done"+(gotLevels?", levels filled in":"")+".","ok")}
+    }
+  }catch(err){}
+  if(!gotLevels){
+    try{
+      const r=await fetch("https://api.wiseoldman.net/v2/players/"+encodeURIComponent(name));
+      if(r.ok){const d=await r.json();const sk=d&&d.latestSnapshot&&d.latestSnapshot.data&&d.latestSnapshot.data.skills;
+        if(sk){const L={};Object.entries(sk).forEach(([k,v])=>{if(v&&v.level>0)L[k]=v.level});applyLevels(L);gotLevels=true;save();refresh()}}
+    }catch(err){}
+  }
+  btn.disabled=false;
+  if(gotQuests)return;
+  if(gotLevels)say("Levels loaded from Wise Old Man. Your quests couldn't be loaded: install the WikiSync plugin in RuneLite, log in once, then try again. Or set your quests by hand below.","ok");
+  else say("Couldn't find "+name+". Check the spelling, or look yourself up once on wiseoldman.net so it starts tracking you, then try again. You can also fill in your levels by hand.","err");
+});
 </script>
 
 </body>
