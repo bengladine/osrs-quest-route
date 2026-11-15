@@ -5,11 +5,11 @@ let S={ticks:{},done:{},status:{LTR:"done"},stats:{}};
 let pageRaw=null,acctRaw=null;
 try{pageRaw=JSON.parse(localStorage.getItem(KEY)||"null");acctRaw=JSON.parse(localStorage.getItem(AKEY)||"null")}catch(e){}
 if(pageRaw)S=Object.assign(S,pageRaw);
-if(acctRaw){S.status=acctRaw.status||S.status;S.stats=acctRaw.stats||{};if(acctRaw.rsn)S.rsn=acctRaw.rsn}
+if(acctRaw){S.status=acctRaw.status||S.status;S.stats=acctRaw.stats||{};if(acctRaw.rsn)S.rsn=acctRaw.rsn;if(acctRaw.synced)S.synced=acctRaw.synced}
 if(!S.status)S.status={};
 if(S.done){for(const k in S.done)if(S.done[k]&&!S.status[k])S.status[k]="done";S.done={}}
 const stOf=k=>S.status[k]||"doing";
-function save(){try{localStorage.setItem(KEY,JSON.stringify({ticks:S.ticks}));localStorage.setItem(AKEY,JSON.stringify({status:S.status,stats:S.stats,rsn:S.rsn}))}catch(e){}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify({ticks:S.ticks}));localStorage.setItem(AKEY,JSON.stringify({status:S.status,stats:S.stats,rsn:S.rsn,synced:S.synced}))}catch(e){}}
 save();
 const qlist=q=>q===""?[]:(Array.isArray(q)?q:[q]);
 const SKILLS=[["combat","Combat"],["mining","Mining"],["smithing","Smithing"],["cooking","Cooking"],["crafting","Crafting"],["magic","Magic"]];
@@ -130,7 +130,8 @@ document.getElementById("no").onclick=()=>{cf.hidden=true};
 document.getElementById("yes").onclick=()=>{S.ticks={};save();rows.forEach(r=>r.cb.checked=false);refresh();cf.hidden=true};
 
 
-/* account lookup: WikiSync (quests + levels), Wise Old Man (levels) as fallback */
+/* account lookup: WikiSync (quests + levels), Wise Old Man (levels) as fallback.
+   WikiSync doesn't allow other sites to read it directly, so quests come in through a one-time copy-paste. */
 const norm=t=>String(t).toLowerCase().replace(/[’`]/g,"'").replace(/&/g,"and").replace(/^the /,"").replace(/[^a-z0-9]/g,"");
 const QBYNAME={};Object.entries(QUESTS).forEach(([k,[n]])=>QBYNAME[norm(n)]=k);
 function combatLevel(L){const g=k=>L[k]||1;const base=0.25*(g("defence")+(L.hitpoints||10)+Math.floor(g("prayer")/2));
@@ -139,24 +140,53 @@ function applyLevels(L){
   ["mining","smithing","cooking","crafting","magic"].forEach(k=>{if(L[k]){S.stats[k]=L[k];const i=document.getElementById("st-"+k);if(i)i.value=L[k]}});
   const c=combatLevel(L);S.stats.combat=c;const ci=document.getElementById("st-combat");if(ci)ci.value=c;
 }
+/* completed quests from an earlier sync (also from the other route page) */
+function applySynced(){let n=0;(S.synced||[]).forEach(q=>{const k=QBYNAME[q];if(k&&stOf(k)!=="done"){S.status[k]="done";n++}});return n}
+if(applySynced()){save();refresh()}
+/* WikiSync data → returns {n, levels} or throws a message */
+function useWikiSync(d){
+  if(!d||typeof d!=="object")throw "That doesn't look like WikiSync data.";
+  if(d.code||d.error||!d.quests)throw "WikiSync has no data for this name yet. Install the WikiSync plugin in RuneLite, log in once, then open the link again.";
+  const done=Object.entries(d.quests).filter(([,v])=>v===2).map(([q])=>norm(q));
+  S.synced=done;const n=applySynced();let levels=false;
+  if(d.levels){const L={};Object.entries(d.levels).forEach(([k,v])=>L[k.toLowerCase()]=v);applyLevels(L);levels=true}
+  save();refresh();return {n,levels};
+}
 const lmsg=document.getElementById("lookupmsg");
 function say(t,cls){lmsg.textContent=t;lmsg.className="hint"+(cls?" "+cls:"")}
-if(S.rsn)document.getElementById("rsn").value=S.rsn;
+const wsUrl=name=>"https://sync.runescape.wiki/runelite/player/"+encodeURIComponent(name)+"/STANDARD";
+/* paste panel, built here so every route page gets it */
+const pasteBox=document.createElement("div");pasteBox.className="wspaste";pasteBox.hidden=true;
+pasteBox.innerHTML=`<p><strong>Load your quests</strong> (needs the WikiSync plugin in RuneLite). WikiSync doesn't let other websites read your data directly, so it takes one copy-paste:</p>
+<ol><li><a id="wslink" target="_blank" rel="noopener">Open your WikiSync data</a> (opens in a new tab)</li>
+<li>Copy everything on that page. Computer: Ctrl+A, then Ctrl+C (Firefox: click <em>Raw Data</em> first). Phone: long-press the text, <em>Select all</em>, <em>Copy</em>.</li>
+<li>Come back and paste it here:</li></ol>
+<textarea id="wstext" rows="3" spellcheck="false" placeholder='Paste here. It starts with {"username":…'></textarea>
+<div class="lookup-row"><button id="wsload" type="button">Load quests</button></div>
+<p id="wsmsg" class="hint" role="status"></p>`;
+document.getElementById("lookup").after(pasteBox);
+const wsmsg=document.getElementById("wsmsg");
+function wsSay(t,cls){wsmsg.textContent=t;wsmsg.className="hint"+(cls?" "+cls:"")}
+function loadPasted(){
+  const t=document.getElementById("wstext").value.trim();if(!t){wsSay("Paste the text from the WikiSync page first.","err");return}
+  let d;try{d=JSON.parse(t.slice(t.indexOf("{"),t.lastIndexOf("}")+1))}catch(e){wsSay("That text isn't complete. Copy everything on the WikiSync page (Select all) and paste again.","err");return}
+  try{const r=useWikiSync(d);wsSay("Done: "+r.n+" more quest"+(r.n===1?"":"s")+" marked done"+(r.levels?", levels filled in":"")+". You can close the WikiSync tab.","ok");document.getElementById("wstext").value=""}
+  catch(m){wsSay(String(m),"err")}
+}
+document.getElementById("wsload").addEventListener("click",loadPasted);
+document.getElementById("wstext").addEventListener("paste",()=>setTimeout(loadPasted,0));
+function showPaste(name){document.getElementById("wslink").href=wsUrl(name);pasteBox.hidden=false}
+if(S.rsn){document.getElementById("rsn").value=S.rsn;showPaste(S.rsn)}
 document.getElementById("lookup").addEventListener("submit",async e=>{
   e.preventDefault();
   const name=document.getElementById("rsn").value.trim();
   if(!name){say("Type your in-game name first.","err");return}
-  S.rsn=name;save();
+  S.rsn=name;save();showPaste(name);
   const btn=document.getElementById("loadbtn");btn.disabled=true;say("Looking up "+name+"…");
   let gotQuests=false,gotLevels=false;
-  try{
-    const r=await fetch("https://sync.runescape.wiki/runelite/player/"+encodeURIComponent(name)+"/STANDARD");
-    if(r.ok){const d=await r.json();
-      if(d.quests){let n=0;Object.entries(d.quests).forEach(([qn,v])=>{const k=QBYNAME[norm(qn)];if(k&&v===2&&stOf(k)!=="done"){S.status[k]="done";n++}});gotQuests=true;
-        if(d.levels){const L={};Object.entries(d.levels).forEach(([k,v])=>L[k.toLowerCase()]=v);applyLevels(L);gotLevels=true}
-        save();refresh();say("Loaded from WikiSync: "+n+" more quest"+(n===1?"":"s")+" marked done"+(gotLevels?", levels filled in":"")+".","ok")}
-    }
-  }catch(err){}
+  /* direct read works only if WikiSync ever allows this site; otherwise it fails quietly and the paste box takes over */
+  try{const r=await fetch(wsUrl(name));if(r.ok){const res=useWikiSync(await r.json());gotQuests=true;gotLevels=res.levels;
+    say("Loaded from WikiSync: "+res.n+" more quest"+(res.n===1?"":"s")+" marked done"+(res.levels?", levels filled in":"")+".","ok");pasteBox.hidden=true}}catch(err){}
   if(!gotLevels){
     try{
       const r=await fetch("https://api.wiseoldman.net/v2/players/"+encodeURIComponent(name));
@@ -166,6 +196,6 @@ document.getElementById("lookup").addEventListener("submit",async e=>{
   }
   btn.disabled=false;
   if(gotQuests)return;
-  if(gotLevels)say("Levels loaded from Wise Old Man. Your quests couldn't be loaded: install the WikiSync plugin in RuneLite, log in once, then try again. Or set your quests by hand below.","ok");
-  else say("Couldn't find "+name+". Check the spelling, or look yourself up once on wiseoldman.net so it starts tracking you, then try again. You can also fill in your levels by hand.","err");
+  if(gotLevels)say("Levels loaded from Wise Old Man. For your quests, follow the 3 steps below.","ok");
+  else say("Couldn't find "+name+" on Wise Old Man. Check the spelling, or look yourself up once on wiseoldman.net, then try again. Your quests can still be loaded with the steps below.","err");
 });
