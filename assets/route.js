@@ -1,15 +1,15 @@
 const W="https://oldschool.runescape.wiki/w/";
 const KEY=window.ROUTE_KEY||"route";
 const AKEY="osrsroute-account";
-let S={ticks:{},done:{},status:{LTR:"done"},stats:{}};
+let S={ticks:{},fold:{},done:{},status:{LTR:"done"},stats:{}};
 let pageRaw=null,acctRaw=null;
 try{pageRaw=JSON.parse(localStorage.getItem(KEY)||"null");acctRaw=JSON.parse(localStorage.getItem(AKEY)||"null")}catch(e){}
 if(pageRaw)S=Object.assign(S,pageRaw);
 if(acctRaw){S.status=acctRaw.status||S.status;S.stats=acctRaw.stats||{};if(acctRaw.rsn)S.rsn=acctRaw.rsn;if(acctRaw.synced)S.synced=acctRaw.synced}
-if(!S.status)S.status={};
+if(!S.status)S.status={};if(!S.fold)S.fold={};
 if(S.done){for(const k in S.done)if(S.done[k]&&!S.status[k])S.status[k]="done";S.done={}}
 const stOf=k=>S.status[k]||"doing";
-function save(){try{localStorage.setItem(KEY,JSON.stringify({ticks:S.ticks}));localStorage.setItem(AKEY,JSON.stringify({status:S.status,stats:S.stats,rsn:S.rsn,synced:S.synced}))}catch(e){}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify({ticks:S.ticks,fold:S.fold}));localStorage.setItem(AKEY,JSON.stringify({status:S.status,stats:S.stats,rsn:S.rsn,synced:S.synced}))}catch(e){}}
 save();
 const qlist=q=>q===""?[]:(Array.isArray(q)?q:[q]);
 const SKILLS=[["combat","Combat"],["mining","Mining"],["smithing","Smithing"],["cooking","Cooking"],["crafting","Crafting"],["magic","Magic"]];
@@ -73,7 +73,7 @@ function reqBadges(req,fight){
 const root=document.getElementById("phases");const rows=[];const sections=[];
 PHASES.forEach((p,pi)=>{
   const s=document.createElement("section");
-  s.innerHTML=`<div class="phase-head"><span class="n">${pi+1}</span><h2>${p.name}</h2><span class="loc">${p.loc||""}</span></div>`;
+  s.innerHTML=`<div class="phase-head"><span class="n">${pi+1}</span><h2>${p.name}</h2><span class="loc">${p.loc||""}</span><span class="prog"></span><button type="button" class="fold" aria-expanded="true">Hide</button></div>`;
   if(p.inv&&p.inv.have){const iv=document.createElement("details");iv.className="inv";const sm=document.createElement("summary");sm.textContent="Inventory check";const a=document.createElement("p");a.innerHTML="<b>Have with you:</b> "+p.inv.have;iv.append(sm,a);if(p.inv.bank){const b=document.createElement("p");b.innerHTML="<b>Can go to the bank:</b> "+p.inv.bank;iv.appendChild(b)}s.appendChild(iv)}
   const ul=document.createElement("ul");ul.className="steps";
   let pos=0;
@@ -88,10 +88,10 @@ PHASES.forEach((p,pi)=>{
     const bw=document.createElement("div");bw.className="badges";li.appendChild(bw);
     if(o.det){const d=document.createElement("details");d.className="more";const sm=document.createElement("summary");sm.textContent="Detailed steps";const ol=document.createElement("ol");o.det.forEach(x=>{const l=document.createElement("li");l.textContent=x;ol.appendChild(l)});d.append(sm,ol);li.appendChild(d)}
     if(o.loc){const a=document.createElement("a");a.className="wlink";a.href=W+o.loc;a.target="_blank";a.rel="noopener";a.textContent="Location and pictures on the wiki ↗";li.appendChild(a)}
-    cb.addEventListener("change",()=>{S.ticks[id]=cb.checked;save();refresh()});
-    ul.appendChild(li);rows.push({li,cb,qs,o,bw,finish:isDoneStep(Array.isArray(text)?text[0]:text)});
+    cb.addEventListener("change",()=>{S.ticks[id]=cb.checked;delete S.fold[pi];save();refresh()});
+    ul.appendChild(li);rows.push({pi,li,cb,qs,o,bw,finish:isDoneStep(Array.isArray(text)?text[0]:text)});
   });
-  s.appendChild(ul);const em=document.createElement("p");em.className="emptynote";em.textContent="Nothing left to do here.";em.hidden=true;s.appendChild(em);root.appendChild(s);sections.push({s,ul,em});
+  s.appendChild(ul);const em=document.createElement("p");em.className="emptynote";em.textContent="Nothing left to do here.";em.hidden=true;s.appendChild(em);root.appendChild(s);const fb=s.querySelector(".fold");fb.addEventListener("click",()=>{S.fold[pi]=!s.classList.contains("folded");save();refresh()});sections.push({s,ul,em,fb,prog:s.querySelector(".prog")});
 });
 
 const dsb=document.getElementById("dsskip");if(dsb)dsb.onclick=()=>{S.status.DRG="skip";save();refresh()};
@@ -112,6 +112,11 @@ function refresh(){
     r.li.classList.toggle("notready",!skip&&!!r.bw.querySelector(".low"));
   });
   sections.forEach(x=>{const lis=[...x.ul.children];const left=lis.some(li=>!li.hidden&&!li.classList.contains("skip"));x.ul.hidden=!left;x.em.hidden=left;const iv=x.s.querySelector(".inv");if(iv)iv.hidden=!left});
+  /* fold: a finished section folds itself, unless the player opened it again */
+  sections.forEach((x,pi)=>{const act=rows.filter(r=>r.pi===pi&&!r.li.hidden&&!r.li.classList.contains("skip"));const todo=act.filter(r=>!r.cb.checked).length;const fin=todo===0;
+    const folded=pi in S.fold?S.fold[pi]:fin;x.s.classList.toggle("folded",folded);x.s.classList.toggle("finished",fin);
+    x.fb.textContent=folded?"Show":"Hide";x.fb.setAttribute("aria-expanded",String(!folded));
+    x.prog.textContent=fin?"Done ✓":(act.length-todo)+" / "+act.length});
   Object.entries(qsel).forEach(([k,sel])=>{sel.value=stOf(k)});
   const c=S.stats.combat,dw=document.getElementById("dswarn");
   if(dw){dw.hidden=!(stOf("DRG")==="doing"&&c&&c<40);if(!dw.hidden)document.getElementById("dsc").textContent=c}
