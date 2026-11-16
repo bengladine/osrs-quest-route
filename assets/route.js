@@ -1,15 +1,15 @@
 const W="https://oldschool.runescape.wiki/w/";
 const KEY=window.ROUTE_KEY||"route";
 const AKEY="osrsroute-account";
-let S={ticks:{},fold:{},done:{},status:{LTR:"done"},stats:{}};
+let S={ticks:{},fold:{},choice:{},done:{},status:{LTR:"done"},stats:{}};
 let pageRaw=null,acctRaw=null;
 try{pageRaw=JSON.parse(localStorage.getItem(KEY)||"null");acctRaw=JSON.parse(localStorage.getItem(AKEY)||"null")}catch(e){}
 if(pageRaw)S=Object.assign(S,pageRaw);
-if(acctRaw){S.status=acctRaw.status||S.status;S.stats=acctRaw.stats||{};if(acctRaw.rsn)S.rsn=acctRaw.rsn;if(acctRaw.synced)S.synced=acctRaw.synced}
+if(acctRaw){S.status=acctRaw.status||S.status;S.stats=acctRaw.stats||{};if(acctRaw.rsn)S.rsn=acctRaw.rsn;if(acctRaw.synced)S.synced=acctRaw.synced;if(acctRaw.choice)S.choice=acctRaw.choice}
 if(!S.status)S.status={};if(!S.fold)S.fold={};
 if(S.done){for(const k in S.done)if(S.done[k]&&!S.status[k])S.status[k]="done";S.done={}}
 const stOf=k=>S.status[k]||"doing";
-function save(){try{localStorage.setItem(KEY,JSON.stringify({ticks:S.ticks,fold:S.fold}));localStorage.setItem(AKEY,JSON.stringify({status:S.status,stats:S.stats,rsn:S.rsn,synced:S.synced}))}catch(e){}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify({ticks:S.ticks,fold:S.fold}));localStorage.setItem(AKEY,JSON.stringify({status:S.status,stats:S.stats,rsn:S.rsn,synced:S.synced,choice:S.choice}))}catch(e){}}
 save();
 const qlist=q=>q===""?[]:(Array.isArray(q)?q:[q]);
 const SKILLS=window.ROUTE_SKILLS||[["combat","Combat"],["mining","Mining"],["smithing","Smithing"],["cooking","Cooking"],["crafting","Crafting"],["magic","Magic"]];
@@ -88,6 +88,8 @@ PHASES.forEach((p,pi)=>{
     if(o.sub){const u=document.createElement("ul");o.sub.forEach(x=>{const l=document.createElement("li");l.textContent=x;u.appendChild(l)});lab.appendChild(u)}
     li.append(cb,tg,lab);
     const bw=document.createElement("div");bw.className="badges";li.appendChild(bw);
+    if(o.pick){const g=document.createElement("div");g.className="pick";g.setAttribute("role","group");o.pick.opts.forEach(([v,t])=>{const b=document.createElement("button");b.type="button";b.dataset.v=v;b.textContent=t;b.onclick=()=>{S.choice[o.pick.key]=S.choice[o.pick.key]===v?undefined:v;save();refresh()};g.appendChild(b)});li.appendChild(g)}
+    if(o.partner){const d=document.createElement("details");d.className="more partner";const sm=document.createElement("summary");sm.textContent=o.partner[0];const ol=document.createElement("ol");o.partner.slice(1).forEach(x=>{const l=document.createElement("li");l.innerHTML=x;ol.appendChild(l)});d.append(sm,ol);li.appendChild(d)}
     if(o.det){const d=document.createElement("details");d.className="more";const sm=document.createElement("summary");sm.textContent="Detailed steps";const ol=document.createElement("ol");o.det.forEach(x=>{const l=document.createElement("li");l.textContent=x;ol.appendChild(l)});d.append(sm,ol);li.appendChild(d)}
     if(o.loc){const a=document.createElement("a");a.className="wlink";a.href=W+o.loc;a.target="_blank";a.rel="noopener";a.textContent="Location and pictures on the wiki ↗";li.appendChild(a)}
     cb.addEventListener("change",()=>{S.ticks[id]=cb.checked;delete S.fold[pi];save();refresh()});
@@ -106,10 +108,12 @@ function refresh(){
     const active=r.qs.length===0||r.qs.some(k=>stOf(k)==="doing");
     const gone=!active&&r.qs.every(k=>stOf(k)==="skip");
     const skip=!active;
-    r.li.hidden=gone;
+    const off=!!r.o.only&&Object.entries(r.o.only).some(([k,v])=>S.choice[k]&&S.choice[k]!==v);
+    r.li.hidden=gone||off;
+    if(r.o.pick)r.li.querySelectorAll(".pick button").forEach(b=>b.setAttribute("aria-pressed",String(S.choice[r.o.pick.key]===b.dataset.v)));
     r.li.classList.toggle("skip",skip&&!gone);r.li.classList.toggle("done",r.cb.checked);
     r.cb.disabled=skip;
-    if(!skip){total++;if(r.cb.checked)ticked++}
+    if(!skip&&!off){total++;if(r.cb.checked)ticked++}
     paintBadges(r.bw,r.o.req,r.o.fight);
     r.li.classList.toggle("notready",!skip&&!!r.bw.querySelector(".low"));
   });

@@ -124,7 +124,7 @@ ul.steps>li.skip .more,ul.steps>li.skip .badges,ul.steps>li.skip .wlink,ul.steps
 
 .wlink{grid-column:3;font-size:13px;justify-self:start}
 .more{grid-column:3}
-.more summary{cursor:pointer;font-size:13px;font-weight:600;color:var(--accent);width:max-content}
+.more summary{cursor:pointer;font-size:13px;font-weight:600;color:var(--accent);width:fit-content;max-width:100%}
 .more ol{margin:6px 0 2px;padding-left:20px;font-size:14px;display:flex;flex-direction:column;gap:3px}
 ul.steps>li.done .more{opacity:.6}
 .pics{grid-column:3;display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end}
@@ -135,7 +135,7 @@ ul.steps>li.done .more{opacity:.6}
 .pics figcaption{font-size:12px;color:var(--muted)}
 ul.steps>li.done .pics{opacity:.45}
 footer{color:var(--muted);font-size:13px}
-@media (max-width:480px){.badges{grid-column:2}.tags{flex-direction:row;flex-wrap:wrap}ul.steps>li{grid-template-columns:22px 1fr}.steps .tag{grid-column:2}.steps label{grid-column:2}.pics{grid-column:2}.more{grid-column:2}.wlink{grid-column:2}}
+@media (max-width:480px){.badges{grid-column:2}.tags{flex-direction:row;flex-wrap:wrap}ul.steps>li{grid-template-columns:22px 1fr}.steps .tag{grid-column:2}.steps label{grid-column:2}.pics{grid-column:2}.more{grid-column:2}.wlink{grid-column:2}.pick{grid-column:2}}
 @media (prefers-reduced-motion:reduce){.bar i{transition:none}}
 
 .topnav{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:14px;color:var(--muted)}
@@ -149,3 +149,8 @@ footer{color:var(--muted);font-size:13px}
 .chapter-h{margin:28px 0 0;font:800 26px/1.15 var(--display,inherit);display:flex;flex-direction:column;gap:2px;scroll-margin-top:72px}
 .chapter-h small{font:500 12px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
 a.chip{text-decoration:none;color:inherit}
+
+.pick{grid-column:3;display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.pick button{font:600 13px var(--body);padding:6px 12px;border:1px solid var(--line);border-radius:999px;background:transparent;color:var(--fg);cursor:pointer}
+.pick button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--bg)}
+@media (max-width:480px){.pick{grid-column:2}}
