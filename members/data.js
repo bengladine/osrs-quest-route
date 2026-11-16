@@ -25,7 +25,7 @@ PA:["Prince Ali Rescue",3,"Prince_Ali_Rescue"],
 DRG:["Dragon Slayer I",2,"Dragon_Slayer_I"]};
 
 const PHASES=[
-{name:"Lumbridge",loc:"Right after the tutorial",
+{name:"Lumbridge",loc:"Right after the tutorial",chapter:{n:1,title:"Getting started"},
  inv:{have:"Your starter items: bronze axe, pickaxe, tinderbox, small net, bucket, pot, weapon",bank:""},
  steps:[
 ["","Learning the Ropes is the tutorial, so it's marked done. Set any other quest you've already finished to Done in the quest list at the top: its steps cross out here and on the F2P route",{id:"m1-0"}],
@@ -166,3 +166,6 @@ const PHASES=[
 ]}
 ];
 const LATER=[];
+/* later chapters add themselves with chapter(n, title, sections, note); step ids become c<n>-<section>-<step> */
+function addQuests(q){Object.assign(QUESTS,q)}
+function chapter(n,title,secs,note){secs.forEach((s,si)=>{if(si===0)s.chapter={n,title,note};s.steps.forEach((st,i)=>{st[2]=st[2]||{};if(!st[2].id)st[2].id=`c${n}-${si}-${i}`})});PHASES.push(...secs)}

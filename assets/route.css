@@ -145,3 +145,7 @@ footer{color:var(--muted);font-size:13px}
 .chapters{display:flex;flex-wrap:wrap;gap:8px}
 .chip{font:600 13px var(--body);padding:5px 11px;border-radius:999px;border:1px solid var(--line);color:var(--muted);background:var(--surface)}
 .chip.on{border-color:var(--accent);color:var(--accent)}
+
+.chapter-h{margin:28px 0 0;font:800 26px/1.15 var(--display,inherit);display:flex;flex-direction:column;gap:2px;scroll-margin-top:72px}
+.chapter-h small{font:500 12px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
+a.chip{text-decoration:none;color:inherit}

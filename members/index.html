@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Members Ironman Quest Route</title>
 <link rel="canonical" href="https://osrsroute.com/members/">
-<meta name="description" content="An OSRS members ironman quest route in chapters: members and free-to-play quests interleaved by location, with inventory checks, dialogue options and requirement warnings. Load your account by name.">
+<meta name="description" content="An OSRS members ironman quest route from the tutorial to the quest cape, in 10 chapters: members and free-to-play quests interleaved by location, with inventory checks, dialogue options and requirement warnings. Load your account by name.">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,500..800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap">
 <link rel="stylesheet" href="/assets/route.css">
 </head>
@@ -17,7 +17,7 @@
   <header>
     <h1>Members Ironman Quest Route</h1>
     <p class="lede">The members quests for ironmen, in chapters. Members and free-to-play quests are mixed by location, so you pick things up on the way and every quest unlocks the next. Progress is shared with the F2P route: a quest done there is crossed out here too.</p>
-    <div class="chapters" aria-label="Chapters"><span class="chip on">Chapter 1: Getting started</span><span class="chip">Chapter 2: Ardougne (coming)</span><span class="chip">Chapter 3 (coming)</span></div>
+    <nav class="chapters" aria-label="Chapters"><a class="chip" href="#ch1">1. Getting started</a><a class="chip" href="#ch2">2. Ardougne and Kandarin</a><a class="chip" href="#ch3">3. Into Morytania</a><a class="chip" href="#ch4">4. Kourend, gnomes, desert</a><a class="chip" href="#ch5">5. Goblins and dwarves</a><a class="chip" href="#ch6">6. Morytania and Feldip</a><a class="chip" href="#ch7">7. Myreque, trolls, Fremennik</a><a class="chip" href="#ch8">8. Mid-game</a><a class="chip" href="#ch9">9. Heroes and elves</a><a class="chip" href="#ch10">10. Quest cape</a></nav>
   </header>
 
   <div class="support">
@@ -51,7 +51,8 @@
   </div>
   <p id="confirm" class="note" hidden>Untick every step? Your quest list and levels stay. <button id="yes" type="button">Yes, reset</button> <button id="no" type="button">Cancel</button></p>
 
-  <p class="note"><strong>Order:</strong> chapter 1 follows the start of the OSRS Wiki's optimal ironman quest order. A few quests start here and finish in a later chapter (Pirate's Treasure, Vampyre Slayer, Enter the Abyss); those steps say so.</p>
+  <p class="note"><strong>Order:</strong> the whole route follows the OSRS Wiki's optimal ironman quest order, from the tutorial to the quest point cape, in 10 chapters. Some quests start in one chapter and finish in a later one; those steps say so. Finished sections fold away by themselves.</p>
+  <p class="note"><strong>New:</strong> chapter 1 has been played through. Chapters 2 to 10 are new and not playtested yet, and from chapter 4 on the steps get shorter. If a step doesn't match the game, the quest tag opens its full wiki guide, and a <a href="https://github.com/bengladine/osrs-quest-route/issues/new?template=route-mistake.md" target="_blank" rel="noopener">mistake report</a> helps fix it.</p>
   <p class="note"><strong>Lamps:</strong> where a step says where to spend an XP lamp, that's to reach the levels the next quests need.</p>
   <p class="note"><strong>Coins:</strong> the Stronghold of Security pays 10,000 coins early on. You'll need most of it for the Lumber Yard and travel.</p>
   <p class="note"><strong>Armour and run energy:</strong> weight doesn't slow you down, but it drains run energy faster. Travel light through towns and put armour on for the fights.</p>
@@ -73,8 +74,18 @@
 <a class="kofi kofi-float" href="https://ko-fi.com/gladinathor" target="_blank" rel="noopener" aria-label="Buy me a coffee on Ko-fi">Buy me a coffee</a>
 <script>
 window.ROUTE_KEY="members-route-v1";
+window.ROUTE_SKILLS=[["combat","Combat"],["attack","Attack"],["strength","Strength"],["defence","Defence"],["ranged","Ranged"],["prayer","Prayer"],["magic","Magic"],["hitpoints","Hitpoints"],["runecraft","Runecraft"],["construction","Construction"],["agility","Agility"],["herblore","Herblore"],["thieving","Thieving"],["crafting","Crafting"],["fletching","Fletching"],["slayer","Slayer"],["hunter","Hunter"],["mining","Mining"],["smithing","Smithing"],["fishing","Fishing"],["cooking","Cooking"],["firemaking","Firemaking"],["woodcutting","Woodcutting"],["farming","Farming"],["sailing","Sailing"]];
 </script>
 <script src="data.js"></script>
+<script src="ch2.js"></script>
+<script src="ch3.js"></script>
+<script src="ch4.js"></script>
+<script src="ch5.js"></script>
+<script src="ch6.js"></script>
+<script src="ch7.js"></script>
+<script src="ch8.js"></script>
+<script src="ch9.js"></script>
+<script src="ch10.js"></script>
 <script src="/assets/route.js"></script>
 </body>
 </html>

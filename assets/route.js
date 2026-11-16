@@ -12,7 +12,8 @@ const stOf=k=>S.status[k]||"doing";
 function save(){try{localStorage.setItem(KEY,JSON.stringify({ticks:S.ticks,fold:S.fold}));localStorage.setItem(AKEY,JSON.stringify({status:S.status,stats:S.stats,rsn:S.rsn,synced:S.synced}))}catch(e){}}
 save();
 const qlist=q=>q===""?[]:(Array.isArray(q)?q:[q]);
-const SKILLS=[["combat","Combat"],["mining","Mining"],["smithing","Smithing"],["cooking","Cooking"],["crafting","Crafting"],["magic","Magic"]];
+const SKILLS=window.ROUTE_SKILLS||[["combat","Combat"],["mining","Mining"],["smithing","Smithing"],["cooking","Cooking"],["crafting","Crafting"],["magic","Magic"]];
+const skillName=k=>(SKILLS.find(s=>s[0]===k)||[k,k.charAt(0).toUpperCase()+k.slice(1)])[1];
 const isDoneStep=(text)=>/Quest done|quest is done/.test(text);
 
 /* quest points: quests marked done, plus quests whose "Quest done" step is ticked */
@@ -62,7 +63,7 @@ function reqBadges(req,fight){
   Object.entries(req).forEach(([k,v])=>{
     let have,label;
     if(k==="qp"){have=qp();label=v+" quest points";}
-    else{have=S.stats[k];label=(k==="combat"?"Combat ":SKILLS.find(s=>s[0]===k)[1]+" ")+v+(k==="combat"?"+ recommended":"");}
+    else{have=S.stats[k];label=(k==="combat"?"Combat ":skillName(k)+" ")+v+(k==="combat"?"+ recommended":"");}
     const cls=have==null?"req":(have>=v?"req ok":"req low");
     out.push({cls,text:label+(have!=null&&have<v?` (you: ${have})`:"")});
   });
@@ -72,6 +73,7 @@ function reqBadges(req,fight){
 /* render steps */
 const root=document.getElementById("phases");const rows=[];const sections=[];
 PHASES.forEach((p,pi)=>{
+  if(p.chapter){const h=document.createElement("h2");h.className="chapter-h";h.id="ch"+p.chapter.n;h.innerHTML=`<small>Chapter ${p.chapter.n}</small>${p.chapter.title}`;root.appendChild(h);if(p.chapter.note){const n=document.createElement("p");n.className="note";n.innerHTML=p.chapter.note;root.appendChild(n)}}
   const s=document.createElement("section");
   s.innerHTML=`<div class="phase-head"><span class="n">${pi+1}</span><h2>${p.name}</h2><span class="loc">${p.loc||""}</span><span class="prog"></span><button type="button" class="fold" aria-expanded="true">Hide</button></div>`;
   if(p.inv&&p.inv.have){const iv=document.createElement("details");iv.className="inv";const sm=document.createElement("summary");sm.textContent="Inventory check";const a=document.createElement("p");a.innerHTML="<b>Have with you:</b> "+p.inv.have;iv.append(sm,a);if(p.inv.bank){const b=document.createElement("p");b.innerHTML="<b>Can go to the bank:</b> "+p.inv.bank;iv.appendChild(b)}s.appendChild(iv)}
@@ -142,7 +144,8 @@ const QBYNAME={};Object.entries(QUESTS).forEach(([k,[n]])=>QBYNAME[norm(n)]=k);
 function combatLevel(L){const g=k=>L[k]||1;const base=0.25*(g("defence")+(L.hitpoints||10)+Math.floor(g("prayer")/2));
   return Math.floor(base+Math.max(0.325*(g("attack")+g("strength")),0.325*Math.floor(g("ranged")*1.5),0.325*Math.floor(g("magic")*1.5)))}
 function applyLevels(L){
-  ["mining","smithing","cooking","crafting","magic"].forEach(k=>{if(L[k]){S.stats[k]=L[k];const i=document.getElementById("st-"+k);if(i)i.value=L[k]}});
+  if(L.runecrafting&&!L.runecraft)L.runecraft=L.runecrafting;
+  SKILLS.map(s=>s[0]).filter(k=>k!=="combat").forEach(k=>{if(L[k]){S.stats[k]=L[k];const i=document.getElementById("st-"+k);if(i)i.value=L[k]}});
   const c=combatLevel(L);S.stats.combat=c;const ci=document.getElementById("st-combat");if(ci)ci.value=c;
 }
 /* completed quests from an earlier sync (also from the other route page) */
